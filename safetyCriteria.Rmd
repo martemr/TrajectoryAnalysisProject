@@ -1,0 +1,166 @@
+---
+---
+---
+
+# Définition d'un critère global de sécurité routiere par carrefour
+
+## Partie 0 : Initialisation des données
+
+Paramêtres d'étude
+
+```{r Params}
+LocationId <<- '4'
+#record_number<<- '00'
+StudiedClass <<- 'ALL' # Classes étduiés
+distanceMin  <<- 20 # Distance minimum parcourue pour etre étudiés (en metres)
+```
+
+Initialisation
+
+```{r Init, include=FALSE}
+source("~/TrajectoryAnalysisProject/code/00_init.r", echo=FALSE)
+source("~/TrajectoryAnalysisProject/code/visualisation/00_visualisationInit.R", echo=FALSE)
+```
+
+## Partie 1 : Présentation de l'étude
+
+### Détail des données collectées
+
+```{r detailData, echo=FALSE}
+infoArray <- recordingMeta[recordingMeta$locationId==LocationId,
+                           c('recordingId','weekday','startTime','duration(m)','numVehicles')]
+colnames(infoArray)=c('ID',"Jour d'enregistrement", 'Heure', 'Durée (m)', 'Usagers observés')
+print(infoArray)
+```
+
+### Comptage
+
+```{r comptage, echo=FALSE}
+source("~/TrajectoryAnalysisProject/code/analysis/04_countUsers.R", echo=FALSE)
+print(traficTable)
+```
+
+### Zone d'étude
+
+```{r zoneEtude, echo=FALSE}
+drawEmptyPlot("Zone d'étude")
+AllTrajectoriesOnOneGraph <<- FALSE
+source("~/TrajectoryAnalysisProject/code/02_drawTrajectories.r", echo=FALSE)
+
+```
+
+## Partie 2 : Véhicules (voitures, camions, bus)
+
+### Trajectoires
+
+```{r clusteringCar, echo=FALSE}
+ClusteringClass <<- 'car'
+StudiedClass <<- 'car'
+source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
+DetailledGraphCluster <<- TRUE
+source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
+```
+
+### Flux
+
+```{r movesDiagramCar, echo=FALSE}
+indMaxAnnotation <<-20
+source("~/TrajectoryAnalysisProject/code/visualisation/04_movesDiagram.R", echo=FALSE)
+```
+
+### Infractions (vitesse)
+
+```{r infractions, echo=FALSE}
+StudiedClass <<- "car"
+source("~/TrajectoryAnalysisProject/code/analysis/01_speedStudy.R", echo=FALSE)
+```
+
+### Zones d'attente
+
+Zone où les véhicules ont été à l'arret = vitesse nulle
+
+```{r waitingZones, echo=FALSE}
+StudiedClass <<- "truck_bus"
+source("~/TrajectoryAnalysisProject/code/analysis/05_stopZones.R", echo=FALSE)
+```
+
+### Comparaison de la circulation par horaires
+
+```{r comptage, echo=FALSE}
+
+#source("~/TrajectoryAnalysisProject/code/analysis/04_countUsers.R", echo=FALSE)
+#print(traficTable)
+```
+
+## Partie 3 : Circulation des cyclistes
+
+### Trajectoires
+
+EN COURS
+
+```{r echo=FALSE}
+ClusteringClass <<- 'bicycle'
+StudiedClass <<- 'bicycle'    
+
+source("~/TrajectoryAnalysisProject/code/01_drawTrajectories.r", echo=FALSE)
+
+
+# source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
+# 
+# source("~/TrajectoryAnalysisProject/code/02_drawClusters.R", echo=FALSE)
+
+#options(warn = defaultW)
+
+```
+
+### Flux
+
+### Infractions ?
+
+### Temps passé sur la chaussée
+
+```{r timeOnRoadBicycle, echo=FALSE}
+StudiedClass <<- "bicycle"
+PlotName <<- "Cyclistes sur la chaussée"
+source("~/TrajectoryAnalysisProject/code/analysis/03_timeOnRoad.R", echo=FALSE)
+```
+
+## Partie 4 : Circulation des piétons
+
+### Trajectoires
+
+### Flux
+
+### Infractions ?
+
+### Zones de rencontre véhicules
+
+```{r timeOnRoad, echo=FALSE}
+StudiedClass <<- "pedestrian"
+PlotName <<- "Traversée de piétons"
+source("~/TrajectoryAnalysisProject/code/analysis/03_timeOnRoad.R", echo=FALSE)
+```
+
+TODO : Selection des piétons qui traversent puis cluster par distance (pour déterminer les passages piétons)
+
+## Partie 5 : Interractions et conflits
+
+## 
+
+```{r eval=FALSE, include=FALSE}
+#source("~/TrajectoryAnalysisProject/code/analysis/01_speedStudy.R", echo=FALSE)
+```
+
+Pistes :
+
+-   Nombre de files
+
+-   Trajectoires concurentes
+
+-   Zones d'arrets
+
+-   Homogénéité des trajectoires
+
+-   zones de rencontres
+
+-   Entrées dans le carrefour
