@@ -16,6 +16,7 @@
 # Parametres
 #==========================================
 if(!exists("indMaxAnnotation")) indMaxAnnotation = 10
+if(!exists("clusters")) stop("Faire tourner une méthode de clustering d'abord")
 
 #==========================================
 # Librairies
@@ -45,7 +46,8 @@ chooseRepresentativeId <- function(idList, method){
 #==========================================
 drawEmptyPlot("Diagramme des déplacements")
 colors = rainbow(n = n_distinct(clusters$clusterId))
-initLabels()
+resetAnnotations()
+
 for (cId in unique(clusters$clusterId)) {
   weigth = length(unlist(clusters[clusterId == cId, 'trackId'])) / nrow(clusters)
   color = colors[cId]

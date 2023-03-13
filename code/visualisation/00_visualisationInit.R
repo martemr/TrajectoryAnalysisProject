@@ -20,25 +20,17 @@ library(png)
 #==========================================
 # Functions
 #==========================================
-labels <- data.frame(matrix(nrow = 0, ncol = 4))
-initLabels <- function(){
-  labels <<- data.frame(matrix(nrow = 0, ncol = 4))
-  colnames(labels) <<- c('lab','x','y','color')
-}
+#annotations <<- data.frame(matrix(nrow = 0, ncol = 4))
 
-minDistance <- function(xLab, yLab, lx, ly) {
-  if(length(lx) == 0) {
-    return(Inf)
-  }
-  min(sqrt((lx - xLab)^2 + (ly - yLab)^2))
+resetAnnotations <- function(){
+  annotations <<- data.table(matrix(nrow = 0, ncol = 4))
 }
-
 
 
 # Store values of annotations
-storeAnnotations <- function(tId, cId, color='black', Type){
+storeAnnotations <- function(tId, cId, color='black', Type="veh/h"){
   # Détermine la valeur à afficher
-  if(Type=='percentages'){
+  if(Type=="percentages"){
     weigth = paste(
       round(
         length(unlist(clusters[clusterId==cId,trackId])) *100/ nrow(clusters), 2),
@@ -53,22 +45,21 @@ storeAnnotations <- function(tId, cId, color='black', Type){
   x = unlist(trajectoriesDataset[trackId == tId, "xCenter"])
   y = unlist(trajectoriesDataset[trackId == tId, "yCenter"])
   
-  # Cherche une position sans conflits
-  pos = 1
-  xLab <- unlist(x[pos])
-  yLab <- unlist(y[pos])
-  while(minDistance(xLab,yLab,labels$x,labels$y) < 30){
-    pos = pos+5
-    if(pos>length(x)) break
-    xLab <- unlist(x[pos])
-    yLab <- unlist(y[pos])
+  # Cherche une position sans conflits avec d'autres annotations
+  pos = seq(6,length(x),5)
+  if(nrow(annotations)==0){
+    annotations <<- data.table(lab=weigth,x=x[1],y=y[1],color=color)
+  } else{
+    minList <- min(sqrt((annotations$x - x[1])^2 + (annotations$y - y[1])^2))
+    for(p in pos){
+      minList <- c(minList, 
+                   min(sqrt((annotations$x - x[p])^2 + (annotations$y - y[p])^2)))
+    }
+    posOptimale <- (which(minList == max(minList))[1]*5)-4
+    annotations <<- rbind(annotations,
+                          list(weigth,x[posOptimale], y[posOptimale], color))
+    
   }
-  
-  ind=nrow(labels)+1
-  labels[ind,'lab']   <<-  weigth
-  labels[ind,'x']     <<-  xLab
-  labels[ind,'y']     <<-  yLab
-  labels[ind,'color'] <<-  color
 }
 
 addArrow <- function(tId, color='black', weigth){
@@ -88,20 +79,21 @@ addArrow <- function(tId, color='black', weigth){
 
 addAnnotations <- function(indMaxAnnotation){
   frsz <- 0.5
-  #labels <- subset(labels, labels$lab>indMaxAnnotation)
-  if(nrow(labels)>0){
-    #labels$lab <- paste(labels$lab,"%")
+  colnames(annotations) <<- c('lab','x','y','color') # Forcer le nom du dataframe
+  #annotations <- subset(annotations, annotations$lab>indMaxAnnotation)
+  if(nrow(annotations)>0){
+    #annotations$lab <- paste(annotations$lab,"%")
     rect(
-      labels$x - strwidth (labels$lab)/2 - frsz,
-      labels$y - strheight(labels$lab)/2 - frsz,
-      labels$x + strwidth (labels$lab)/2 + frsz,
-      labels$y + strheight(labels$lab)/2 + frsz,
-      col=labels$color
+      annotations$x - strwidth (annotations$lab)/2 - frsz,
+      annotations$y - strheight(annotations$lab)/2 - frsz,
+      annotations$x + strwidth (annotations$lab)/2 + frsz,
+      annotations$y + strheight(annotations$lab)/2 + frsz,
+      col=annotations$color
     )
     text(
-      x = labels$x,
-      y = labels$y,
-      labels = labels$lab,
+      x = annotations$x,
+      y = annotations$y,
+      labels = annotations$lab,
       col = 'black'
     )
   }

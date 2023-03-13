@@ -86,7 +86,7 @@ source("~/TrajectoryAnalysisProject/code/analysis/05_stopZones.R", echo=FALSE)
 
 ### Comparaison de la circulation par horaires
 
-```{r comptage, echo=FALSE}
+```{r hoursCompare, echo=FALSE}
 
 #source("~/TrajectoryAnalysisProject/code/analysis/04_countUsers.R", echo=FALSE)
 #print(traficTable)
@@ -98,7 +98,7 @@ source("~/TrajectoryAnalysisProject/code/analysis/05_stopZones.R", echo=FALSE)
 
 EN COURS
 
-```{r echo=FALSE}
+```{r eval=FALSE, include=FALSE}
 ClusteringClass <<- 'bicycle'
 StudiedClass <<- 'bicycle'    
 
