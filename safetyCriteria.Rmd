@@ -68,7 +68,7 @@ indMaxAnnotation <<-20
 source("~/TrajectoryAnalysisProject/code/visualisation/04_movesDiagram.R", echo=FALSE)
 ```
 
-### Infractions (vitesse)
+### Vitesses pratiqués par trajectoires
 
 ```{r infractions, echo=FALSE}
 StudiedClass <<- "car"
