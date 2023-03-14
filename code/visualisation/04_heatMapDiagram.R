@@ -53,7 +53,7 @@ addPadding <- function(matToPlot){
 #==========================================
 # Affiche la heatmap
 #==========================================
-printHeatMapMatrix <- function(mat = padMatrix, alpha=0.5, name="Carte de chaleur"){
+printHeatMapMatrix <- function(mat = padMatrix, alpha=0.5, name="Carte de chaleur",subTitle=""){
   trellis.par.set(regions = list(alpha = 0.5))
   p = levelplot(
     mat,
@@ -65,8 +65,10 @@ printHeatMapMatrix <- function(mat = padMatrix, alpha=0.5, name="Carte de chaleu
     xlab="X",
     ylab="Y", 
     at=seq(0,100,10),
-    cuts=10
-  )
+    cuts=10, 
+    sub=subTitle
+  ) 
+  #+ layer_(panel.2dsmoother(..., n = 200))
   plot(p + layer(grid.raster(as.raster(bg_image)), under = TRUE))
 }
 
