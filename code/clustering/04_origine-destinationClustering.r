@@ -45,7 +45,9 @@ fviz_cluster(clusteringResult, data = scale(tracksMeta[,.(origineHeading,destina
 # Récupération des clusters
 clusters <- data.table('trackId'=tracksMeta$trackId, 'clusterId'=clusteringResult$cluster)
 
-# On ne garde que les clusters avec plus de 2 courbes
-clusters <- clusters[clusterId %in% clusters[,.(number=.N),by="clusterId"][number>2,clusterId]]
+# On ne garde que les clusters avec plus de 4 courbes
+clusters <- clusters[clusterId %in% clusters[,.(number=.N),by="clusterId"][number>4,clusterId]]
+clusters <- data.table(clusterId=match(clusters$clusterId, unique(clusters$clusterId)), trackId=clusters$trackId) # Replace clusters values by 1 -> max values
 print(paste("Il y a", n_distinct(clusters$clusterId), "trajectoires différentes"))
 clusterDataset <- clusterDataset[clusters, on=.(trackId)]
+
