@@ -25,6 +25,19 @@ getSpeed <- function(xSpeed,ySpeed){
   (sqrt(xSpeed^2+ySpeed^2))*3.6
 }
 
+hasDoneInfraction <- function(tId){
+  speedArrayTrack <- getSpeed(trajectoriesDataset[trackId==tId,.(xVelocity, yVelocity)][,1],
+                              trajectoriesDataset[trackId==tId,.(xVelocity, yVelocity)][,2])
+  for(speed in speedArrayTrack){
+    # Compute if the speed is above limit of 5km/h for 3s.
+    # Return True if yes
+  }
+}
+
+getInfractionRate <- function(cId){
+  # Applique la fonction hasdoneinfractions a tout le cluster
+}
+
 #==========================================
 # Analysis of the speed
 #==========================================
@@ -50,7 +63,7 @@ for (cId in unique(clusters$clusterId)){
   
   # N'affiche pas les valeurs nulles
   matToPlot[matToPlot==0]<- NA
-  printHeatMapMatrix(mat = matToPlot, name =paste("Vitesses pratiquées cluster",cId ))
+  printHeatMapMatrix(mat = matToPlot, name =paste("Vitesses pratiquées cluster",cId ), subTitle = paste(getInfractionRate(cId), "%des véhicules commettent un excès de vitesse"))
 }
 
 
