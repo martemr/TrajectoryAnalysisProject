@@ -28,9 +28,10 @@ source("~/TrajectoryAnalysisProject/code/visualisation/00_visualisationInit.R", 
 
 ```{r detailData, echo=FALSE}
 infoArray <- recordingMeta[recordingMeta$locationId==LocationId,
-                           c('recordingId','weekday','startTime','duration(m)','numVehicles')]
+                           c('recordingId','weekday','startTime','duration(m)','numVehicles')] 
 colnames(infoArray)=c('ID',"Jour d'enregistrement", 'Heure', 'Durée (m)', 'Usagers observés')
 print(infoArray)
+rm(infoArray)
 ```
 
 ### Comptage
@@ -38,6 +39,7 @@ print(infoArray)
 ```{r comptage, echo=FALSE}
 source("~/TrajectoryAnalysisProject/code/analysis/04_countUsers.R", echo=FALSE)
 print(traficTable)
+rm(traficTable)
 ```
 
 ### Zone d'étude
@@ -64,14 +66,17 @@ source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
 ### Flux
 
 ```{r movesDiagramCar, echo=FALSE}
-indMaxAnnotation <<-20
-source("~/TrajectoryAnalysisProject/code/visualisation/04_movesDiagram.R", echo=FALSE)
+#indMaxAnnotation <<-20
+ClusteringClass <<- 'car'
+StudiedClass <<- 'car'
+source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R", echo=FALSE)
 ```
 
 ### Vitesses pratiqués par trajectoires
 
 ```{r infractions, echo=FALSE}
 StudiedClass <<- "car"
+source("~/TrajectoryAnalysisProject/code/visualisation/04_heatMapDiagram.R", echo=FALSE)
 source("~/TrajectoryAnalysisProject/code/analysis/01_speedStudy.R", echo=FALSE)
 ```
 
@@ -98,18 +103,15 @@ source("~/TrajectoryAnalysisProject/code/analysis/05_stopZones.R", echo=FALSE)
 
 EN COURS
 
-```{r eval=FALSE, include=FALSE}
+```{r Bicycles, eval=FALSE, include=FALSE}
 ClusteringClass <<- 'bicycle'
 StudiedClass <<- 'bicycle'    
 
-source("~/TrajectoryAnalysisProject/code/01_drawTrajectories.r", echo=FALSE)
-
-
-# source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
+source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
 # 
-# source("~/TrajectoryAnalysisProject/code/02_drawClusters.R", echo=FALSE)
+source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
 
-#options(warn = defaultW)
+source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R", echo=FALSE)
 
 ```
 
@@ -130,6 +132,17 @@ source("~/TrajectoryAnalysisProject/code/analysis/03_timeOnRoad.R", echo=FALSE)
 ### Trajectoires
 
 ### Flux
+
+```{r PedestrianFlux, echo=FALSE}
+ClusteringClass <<- 'pedestrian'
+StudiedClass <<- 'pedestrian'    
+
+source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
+# 
+source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
+
+source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R", echo=FALSE)
+```
 
 ### Infractions ?
 
