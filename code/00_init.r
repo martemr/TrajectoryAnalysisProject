@@ -140,5 +140,7 @@ source("~/TrajectoryAnalysisProject/code/01_plotUtils.R", echo=FALSE)
 #==========================================
 # Nettoyage des variables utilisés pour l'initialisation
 #==========================================
-#rm(calculateDistance, tracksDistance)
+rm(calculateDistance)
+rm(bgName, distanceMin, dosinit, i, recordingMetaName)
+rm(SimplifyData, tracksMetaName, tracksName, trajectoryIdMax)
 #rm(recordingMeta, recordingMetaName)

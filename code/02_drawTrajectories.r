@@ -48,3 +48,8 @@ for (cl in unique(trajectoriesDataset$class))
   #print(trajectoriesDataset[trajectoriesDataset$trackId==tId & trajectoriesDataset$class==StudiedClass,"yCenter"])
 }
 
+#==========================================
+# Nettoyage dataset
+#==========================================
+rm(AllTrajectoriesOnOneGraph, cl, ClassColored, EraseOldGraphs)
+

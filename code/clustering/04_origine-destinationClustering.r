@@ -9,24 +9,18 @@
 #==========================================
 # Parametres
 #==========================================
-DetailledGraphCluster = FALSE
 if(!exists("ClusteringClass")) ClusteringClass = 'car' # 'ALL' for all class
-
-######
 clusterDataset <- trajectoriesDataset[trajectoriesDataset$class==ClusteringClass,]
-range = unique(clusterDataset$trackId)
 
 #==========================================
 # Librairies
 #==========================================
 library(dbscan)
 library(factoextra)
-#library(tidyverse)
 
 #==========================================
 # Clustering par origine et destinations
 #==========================================
-
 # Origine
 tracksMeta <- tracksMeta[clusterDataset[trackLifetime<5,.(origineHeading=mean(heading)),by = "trackId"]
   , on='trackId'
@@ -51,3 +45,7 @@ clusters <- data.table(clusterId=match(clusters$clusterId, unique(clusters$clust
 print(paste("Il y a", n_distinct(clusters$clusterId), "trajectoires différentes"))
 clusterDataset <- clusterDataset[clusters, on=.(trackId)]
 
+#==========================================
+# Nettoyage environnement
+#==========================================
+rm(clusteringResult)
