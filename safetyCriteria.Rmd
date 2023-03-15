@@ -55,7 +55,7 @@ source("~/TrajectoryAnalysisProject/code/02_drawTrajectories.r", echo=FALSE)
 
 ### Trajectoires
 
-```{r clusteringCar, echo=FALSE}
+```{r clusteringCar, echo=FALSE, message=FALSE, warning=FALSE}
 ClusteringClass <<- 'car'
 StudiedClass <<- 'car'
 source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
@@ -65,7 +65,7 @@ source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
 
 ### Flux
 
-```{r movesDiagramCar, echo=FALSE}
+```{r movesDiagramCar, echo=FALSE, message=FALSE, warning=FALSE}
 #indMaxAnnotation <<-20
 ClusteringClass <<- 'car'
 StudiedClass <<- 'car'
@@ -74,7 +74,7 @@ source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R", echo=
 
 ### Vitesses pratiqués par trajectoires
 
-```{r infractions, echo=FALSE}
+```{r infractions, echo=FALSE, message=FALSE, warning=FALSE}
 StudiedClass <<- "car"
 source("~/TrajectoryAnalysisProject/code/visualisation/04_heatMapDiagram.R", echo=FALSE)
 source("~/TrajectoryAnalysisProject/code/analysis/01_speedStudy.R", echo=FALSE)
@@ -99,11 +99,22 @@ source("~/TrajectoryAnalysisProject/code/analysis/05_stopZones.R", echo=FALSE)
 
 ## Partie 3 : Circulation des cyclistes
 
+```{r restartMemoryBicycle, include=FALSE}
+# Restart R memory
+rm(list = ls())
+
+LocationId <<- '4'
+#record_number<<- '00'
+StudiedClass <<- 'ALL' # Classes étduiés
+distanceMin  <<- 20 # Distance minimum parcourue pour etre étudiés (en metres)
+
+source("~/TrajectoryAnalysisProject/code/00_init.r", echo=FALSE)
+source("~/TrajectoryAnalysisProject/code/visualisation/00_visualisationInit.R", echo=FALSE)
+```
+
 ### Trajectoires
 
-EN COURS
-
-```{r Bicycles, eval=FALSE, include=FALSE}
+```{r Bicycles, echo=FALSE}
 ClusteringClass <<- 'bicycle'
 StudiedClass <<- 'bicycle'    
 
@@ -128,6 +139,19 @@ source("~/TrajectoryAnalysisProject/code/analysis/03_timeOnRoad.R", echo=FALSE)
 ```
 
 ## Partie 4 : Circulation des piétons
+
+```{r restartMemoryPedestrian, include=FALSE}
+# Restart R memory
+rm(list = ls())
+
+LocationId <<- '4'
+#record_number<<- '00'
+StudiedClass <<- 'ALL' # Classes étduiés
+distanceMin  <<- 20 # Distance minimum parcourue pour etre étudiés (en metres)
+
+source("~/TrajectoryAnalysisProject/code/00_init.r", echo=FALSE)
+source("~/TrajectoryAnalysisProject/code/visualisation/00_visualisationInit.R", echo=FALSE)
+```
 
 ### Trajectoires
 
