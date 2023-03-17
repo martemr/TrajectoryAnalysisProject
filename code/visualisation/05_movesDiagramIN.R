@@ -66,3 +66,21 @@ for (id in unique(clusters$clusterId)) {
 #==========================================
 addAnnotations(indMaxAnnotation)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+for (tId in unique(trajectoriesDataset[class=='car', trackId])){
+  drawVector(x = unlist(trajectoriesDataset[trackId==tId, .(x=xCenter)][1]), 
+             y = unlist(trajectoriesDataset[trackId==tId, .(y=yCenter)][1]), 
+             angle = unlist(trajectoriesDataset[trackId==tId, .(head=heading)][1]))
+}
