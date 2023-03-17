@@ -53,7 +53,7 @@ for (tId in unique(trackIds[inside])){
 }
 
 legend(5,-5, 
-       "legend"=c("Limites de la chaussée","Pietons sur la chaussée", "Piétons sur le trotoir"), 
+       "legend"=c("Limites de la chaussée",paste(StudiedClass, "sur la chaussée"), paste(StudiedClass, "sur le trotoir")), 
        col=c('red','green','orange'), lty=1, lwd=c(2,4,4))
 
 print(paste(
