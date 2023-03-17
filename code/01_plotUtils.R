@@ -38,3 +38,15 @@ drawEmptyPlot <- function(PlotName,Background=TRUE){
                 ybottom=ylim[1], ytop=ylim[2])
   }
 }
+
+#==========================================
+# Vectors
+#==========================================
+drawVector <- function(x,y,angle,size=10, col='blue'){
+  angle = angle * (pi / 180)
+  arrows(x0=x,
+        x1=(x + size * cos(angle)),
+        y0=y, 
+        y1=(y + size * sin(angle)),
+         lwd = 2, col = col)
+}
