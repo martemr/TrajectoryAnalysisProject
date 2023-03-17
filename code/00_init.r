@@ -129,6 +129,7 @@ if(!is.na(trajectoryIdMax)){
 #==========================================
 setDT(trajectoriesDataset)
 trajectoriesDataset <- trajectoriesDataset[, group := trunc(trackLifetime / 5)]
+trajectoriesDataset <- trajectoriesDataset[, group := trunc(frame / 5)]
 trajectoriesDataset <- trajectoriesDataset[, lapply(.SD, mean), by = .(trackId, group), .SDcols = is.numeric]
 trajectoriesDataset <- inner_join(trajectoriesDataset[,3:ncol(trajectoriesDataset)], tracksMeta[,c('trackId','class')], by='trackId')
 
@@ -141,6 +142,6 @@ source("~/TrajectoryAnalysisProject/code/01_plotUtils.R", echo=FALSE)
 # Nettoyage des variables utilisés pour l'initialisation
 #==========================================
 rm(calculateDistance)
-rm(bgName, distanceMin, dosinit, i, recordingMetaName)
+rm(bgName, distanceMin, i, recordingMetaName)
 rm(SimplifyData, tracksMetaName, tracksName, trajectoryIdMax)
 #rm(recordingMeta, recordingMetaName)
