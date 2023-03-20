@@ -13,7 +13,7 @@
 #==========================================
 
 
-totalTime = unlist(sum(recordingMeta[recordingMeta$locationId==LocationId,'duration']))/3600
+totalTime = unlist(sum(recordingMeta[locationId==LocationId,'duration']))/60
 
 traficTable <- data.table("Usagers totaux" , round((n_distinct(trajectoriesDataset$trackId)/totalTime),0),'usagers/heure')
 traficTable <- 
@@ -22,3 +22,4 @@ traficTable <-
   rbind(traficTable, list("Piétons" ,round((n_distinct(trajectoriesDataset[trajectoriesDataset$class == 'pedestrian', 'trackId'])/ totalTime), 0), 'usagers/heure'))
 traficTable <- 
   rbind(traficTable, list("Vélos" ,round((n_distinct(trajectoriesDataset[trajectoriesDataset$class == 'bicycle', 'trackId'])/ totalTime), 0), 'usagers/heure'))
+colnames(traficTable)=c('Type', 'Valeur', 'Unité')

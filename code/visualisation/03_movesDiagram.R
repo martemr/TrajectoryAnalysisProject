@@ -49,6 +49,7 @@ colors = rainbow(n = n_distinct(clusters$clusterId))
 resetAnnotations()
 
 for (cId in unique(clusters$clusterId)) {
+  
   weigth = length(unlist(clusters[clusterId == cId, 'trackId'])) / nrow(clusters)
   color = colors[cId]
   idList = tracksMeta[trackId %in% unlist(clusters[clusterId == cId, 'trackId']), .(trackId,distanceTraveled,class)]
@@ -62,6 +63,11 @@ for (cId in unique(clusters$clusterId)) {
   
   # Store values of annotations
   storeAnnotations(tId, cId, color, Type="veh/h")
+  if(detailledMovesDiagram){
+    addAnnotations(indMaxAnnotation)
+    resetAnnotations()
+    drawEmptyPlot(paste("Trajectoire :"), cId)
+  }
 }
 
 

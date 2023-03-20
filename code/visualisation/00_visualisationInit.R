@@ -37,7 +37,7 @@ storeAnnotations <- function(tId, cId, color='black', Type="veh/h"){
       "%", sep="")
   } else if (Type=='veh/h'){
     weigth = paste(round(length(unlist(clusters[clusterId == cId, trackId])) / 
-                           (unlist(sum(recordingMeta[locationId == LocationId, 'duration'])) / 3600), 0),
+                           (unlist(sum(recordingMeta[locationId == LocationId, 'duration'])) / 60), 0),
     "veh/h", sep = "")
   }
   
@@ -80,7 +80,7 @@ addArrow <- function(tId, color='black', weigth){
 addAnnotations <- function(indMaxAnnotation){
   frsz <- 0.5
   colnames(annotations) <<- c('lab','x','y','color') # Forcer le nom du dataframe
-  #annotations <- subset(annotations, annotations$lab>indMaxAnnotation)
+  annotations <- subset(annotations, annotations$lab>indMaxAnnotation)
   if(nrow(annotations)>0){
     #annotations$lab <- paste(annotations$lab,"%")
     rect(

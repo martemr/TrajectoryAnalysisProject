@@ -21,22 +21,24 @@ for (id in unique(clusters$trackId)){
 #==========================================
 # Tracé 1 graphe par cluster
 #==========================================
-# Création des sous groupes
-for (cId in unique(clusters$clusterId)){
-  #print(clusterId)
-  if(is.na(cId)) next
-  #initLabels()
-  idList = unlist(clusters[clusterId==cId,'trackId'])
-  drawEmptyPlot(paste("Cluster", cId))
-  color=colors[cId]
-  for (id in unlist(idList)) {
-    lines(unlist(trajectoriesDataset[trajectoriesDataset$trackId == id, "xCenter"]),
-          unlist(trajectoriesDataset[trajectoriesDataset$trackId == id, "yCenter"]),
-          col = color)
+if(DetailledGraphCluster){
+  # Création des sous groupes
+  for (cId in unique(clusters$clusterId)){
+    #print(clusterId)
+    if(is.na(cId)) next
+    #initLabels()
+    idList = unlist(clusters[clusterId==cId,'trackId'])
+    drawEmptyPlot(paste("Cluster", cId))
+    color=colors[cId]
+    for (id in unlist(idList)) {
+      lines(unlist(trajectoriesDataset[trajectoriesDataset$trackId == id, "xCenter"]),
+            unlist(trajectoriesDataset[trajectoriesDataset$trackId == id, "yCenter"]),
+            col = color)
+    }
+    
+    #storeAnnotations(idList[1], color)
+    #addAnnotations(0)
   }
-  
-  #storeAnnotations(idList[1], color)
-  #addAnnotations(0)
 }
 
 #==========================================

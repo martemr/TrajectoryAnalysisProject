@@ -6,13 +6,12 @@
 # Description : Initialisation des données
 ##---------------------------------------------
 
-#rm(list = ls())
+rm(list = ls())
 #==========================================
 # Parametres
 #==========================================
 ## Chemins  
 if(!exists("LocationId") & !exists("RecordNumbers")) {LocationId <- 1}
-#LocationId <- 4
 RecordNumbers <- 0
 if(!exists("StudiedClass")) StudiedClass = 'car' # 'ALL' for all class
 if(!exists("distanceMin")) distanceMin = 15 # Filtre de distance minimum à parcourir
@@ -41,9 +40,6 @@ calculateDistance <- function(lx, ly) {
 #==========================================
 # Chargement des Metadonnées
 #==========================================
-## Récupération des noms de fichiers
-#setwd(paste("C:/Users/martin.emery/Documents/Courbes_trajectoires/",dosinit,sep=""))
-
 # Charge toutes les données des recordings
 recordingMeta <- data.table()
 for (i in 0:32) {
@@ -54,7 +50,7 @@ for (i in 0:32) {
 
 
 # Calcule la durée de chacune en minute
-recordingMeta[, `duration(m)` := duration / 60]
+recordingMeta[, `duration` := duration / 60]
 RecordNumbers <- unlist(recordingMeta[recordingMeta$locationId==LocationId,'recordingId'])
 
 #==========================================
@@ -112,7 +108,7 @@ tracksToRemove <- subset(trajectoriesDataset, recordingId %in% maxs$recordingId 
 trajectoriesDataset <- trajectoriesDataset[!(trajectoriesDataset$'trackId' %in% (tracksToRemove$trackId)),]
 rm(maxs, tracksToRemove)
 
-# 
+# Selection de la classe étudié
 if(StudiedClass!='ALL'){
     filter(trajectoriesDataset, trackId %in% tracksMeta[tracksMeta$class %in% StudiedClass ,'trackId'])
 }
@@ -145,3 +141,9 @@ rm(calculateDistance)
 rm(bgName, distanceMin, i, recordingMetaName)
 rm(SimplifyData, tracksMetaName, tracksName, trajectoryIdMax)
 #rm(recordingMeta, recordingMetaName)
+
+
+
+
+
+print(paste("Pré-traitement :", n_distinct(tracks[!(trackId %in% unique(trajectoriesDataset$trackId)),trackId]), "trajectoires ont été retirés sur",  n_distinct(tracks$trackId)))

@@ -1,12 +1,14 @@
----
----
----
-
 # Définition d'un critère global de sécurité routiere par carrefour
 
-## Partie 0 : Initialisation des données
+Pour cet exemple d'étude, nous utilisons un jeu de données Allemand, le dataset inD (<https://www.ind-dataset.com/>), datant de 2020.
 
-Paramêtres d'étude
+Il comprend 32 enregistrements, filmé par des drônes au dessus de 4 carrefours différents. Chaque enregistrement est déjà pré-traité : Il y a 4 usagers différents : piétons, voitures, bus/camion, vélos. Les vidéos sont découpés en image (frames). Il y en 25 par secondes de vidéo et chaque usager est détecté sur l'image. Le jeu de donnée est donc un ensemble de lignes (plusieurs millions) où chaque ligne est un usager et les variables qui le décrivent (type, position, vitesse, etc.) situé dans une frame, elle même situé dans l'ensemble de vidéo.
+
+Le jeu de donnée ne nous donne pas accès aus vidéos originales.
+
+##  Initialisation des données
+
+Pour cette étude nous allons nous concentrer sur un carrefour en particulier, mais l'étude fonctionne pour chacun des 4. Nous commençons par sélectionner les données qui nous intéressent.
 
 ```{r Params}
 LocationId <<- '4'
@@ -15,9 +17,17 @@ StudiedClass <<- 'ALL' # Classes étduiés
 distanceMin  <<- 20 # Distance minimum parcourue pour etre étudiés (en metres)
 ```
 
-Initialisation
+Nous récupérons toutes les données qui existent dans cette localisation, ainsi que les métadonnées proprent à chaque enregistrement.
 
-```{r Init, include=FALSE}
+Afin de simplifier l'étude et les calculs, nous appliquons plusieurs traitements :
+
+-   Nous ne gardons pas les **usagers n'ayant pas parcouru plus que la distance définie précédemment**. Cela permet notamment d'éliminer les véhicules garés, les piétons immobiles et autres détections indésirables.
+
+-   Nous ne gardons pas les **trajectoires potentiellement non entières**, autrement dit les trajectoires des usagers présent au début de l'enregistrement (5 premières/dernières frames) et à la fin de celui-ci. L'analyse d'une trajectoire ayant déjà commencé ou ne se terminant pas cause des erreurs.
+
+-   Enfin, nous divisons les échantillons par 5. Chaque 5 frames est agregé en 1 frame par la moyenne des 5.
+
+```{r Init, echo=FALSE}
 source("~/TrajectoryAnalysisProject/code/00_init.r", echo=FALSE)
 source("~/TrajectoryAnalysisProject/code/visualisation/00_visualisationInit.R", echo=FALSE)
 ```
@@ -27,9 +37,9 @@ source("~/TrajectoryAnalysisProject/code/visualisation/00_visualisationInit.R", 
 ### Détail des données collectées
 
 ```{r detailData, echo=FALSE}
-infoArray <- recordingMeta[recordingMeta$locationId==LocationId,
-                           c('recordingId','weekday','startTime','duration(m)','numVehicles')] 
-colnames(infoArray)=c('ID',"Jour d'enregistrement", 'Heure', 'Durée (m)', 'Usagers observés')
+infoArray <- recordingMeta[locationId==LocationId,
+                           .(recordingId,weekday,paste(startTime,"h00",sep=""),paste(round(duration,0),"min"),numVehicles)] 
+colnames(infoArray)=c("ID","Jour d'enregistrement", 'Heure de début', 'Durée (min)', 'Usagers observés')
 print(infoArray)
 rm(infoArray)
 ```
@@ -44,6 +54,8 @@ rm(traficTable)
 
 ### Zone d'étude
 
+Ici est présenté la zone d'étude. Chaque trajectoire est reconstitué par interpolation linéaire entre ses points.
+
 ```{r zoneEtude, echo=FALSE}
 drawEmptyPlot("Zone d'étude")
 AllTrajectoriesOnOneGraph <<- FALSE
@@ -53,13 +65,15 @@ source("~/TrajectoryAnalysisProject/code/02_drawTrajectories.r", echo=FALSE)
 
 ## Partie 2 : Véhicules (voitures, camions, bus)
 
+Dans cette partie nous nous concentrons sur l'étude des véhicules. Nous cherchons dans un premier temps à classer les véhicules en fonction de leur origine et leur destination au sein du carrefour.
+
 ### Trajectoires
 
 ```{r clusteringCar, echo=FALSE, message=FALSE, warning=FALSE}
 ClusteringClass <<- 'car'
 StudiedClass <<- 'car'
 source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
-DetailledGraphCluster <<- TRUE
+DetailledGraphCluster <<- FALSE
 source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
 ```
 
@@ -69,6 +83,7 @@ source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
 #indMaxAnnotation <<-20
 ClusteringClass <<- 'car'
 StudiedClass <<- 'car'
+detailledMovesDiagram <<- TRUE
 source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R", echo=FALSE)
 ```
 
