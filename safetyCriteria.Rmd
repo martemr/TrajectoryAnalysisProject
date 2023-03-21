@@ -2,15 +2,16 @@
 
 Pour cet exemple d'étude, nous utilisons un jeu de données Allemand, le dataset inD (<https://www.ind-dataset.com/>), datant de 2020.
 
-Il comprend 32 enregistrements, filmé par des drônes au dessus de 4 carrefours différents. Chaque enregistrement est déjà pré-traité : Il y a 4 usagers différents : piétons, voitures, bus/camion, vélos. Les vidéos sont découpés en image (frames). Il y en 25 par secondes de vidéo et chaque usager est détecté sur l'image. Le jeu de donnée est donc un ensemble de lignes (plusieurs millions) où chaque ligne est un usager et les variables qui le décrivent (type, position, vitesse, etc.) situé dans une frame, elle même situé dans l'ensemble de vidéo.
+Il comprend 32 enregistrements, filmé par des drônes au dessus de 4 carrefours différents. Chaque enregistrement est déjà pré-traité : Il y a 4 usagers différents : piétons, voitures, bus/camion, vélos. Les vidéos sont découpés en 25 image par secondes (frames). Chaque usager est détecté sur l'image. Le jeu de donnée est donc un ensemble de lignes (plusieurs millions) où chaque ligne est un usager et les variables qui le décrivent (type, position, vitesse, etc.) situé dans une image, elle même situé dans l'ensemble de vidéo.
 
-Le jeu de donnée ne nous donne pas accès aus vidéos originales.
+Le jeu de donnée ne nous donne pas accès aux vidéos originales.
 
-##  Initialisation des données
+## Initialisation des données
 
 Pour cette étude nous allons nous concentrer sur un carrefour en particulier, mais l'étude fonctionne pour chacun des 4. Nous commençons par sélectionner les données qui nous intéressent.
 
 ```{r Params}
+rm(list = ls()) # Efface tous les paramètres précédents
 LocationId <<- '4'
 #record_number<<- '00'
 StudiedClass <<- 'ALL' # Classes étduiés
@@ -54,7 +55,9 @@ rm(traficTable)
 
 ### Zone d'étude
 
-Ici est présenté la zone d'étude. Chaque trajectoire est reconstitué par interpolation linéaire entre ses points.
+Ici est présenté la zone d'étude. Chaque trajectoire est un ensemble de points. Nous reconstituons donc les trajets par interpolation linéaire entre ses points.
+
+Les données sont décrites dans un plan (X,Y). Ce plan est défini dans le **système de coordonnées UTM**. Les valeurs sont recentrés autour du point en haut à gauche de l'image (0,0). La vraie valeur de ce point dans les coordonnées UTM est donnée permettant de resituer de manière absolue toutes les informations.
 
 ```{r zoneEtude, echo=FALSE}
 drawEmptyPlot("Zone d'étude")
@@ -79,6 +82,8 @@ source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
 
 ### Flux
 
+Ci-dessous sont détaillés les flux de véhicules sur le cumul des enregistrements, par origine et par destination. Les valeurs affichés peuvent être en *véhicules par heure* ou en *poucentage du flux total*. Sur ce diagramme, la taille de la fleche est proportionelle à la taille du flux.
+
 ```{r movesDiagramCar, echo=FALSE, message=FALSE, warning=FALSE}
 #indMaxAnnotation <<-20
 ClusteringClass <<- 'car'
@@ -88,6 +93,8 @@ source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R", echo=
 ```
 
 ### Vitesses pratiqués par trajectoires
+
+Ici, nous cherchons à analyser les vitesses pratiqués en fonction des chemins des véhicules. La carte de chaleur nous permet de voir du froid au chaud les zones de ralentissements, d'arrets et d'excès de vitesse.
 
 ```{r infractions, echo=FALSE, message=FALSE, warning=FALSE}
 StudiedClass <<- "car"
@@ -107,7 +114,12 @@ source("~/TrajectoryAnalysisProject/code/analysis/05_stopZones.R", echo=FALSE)
 ### Comparaison de la circulation par horaires
 
 ```{r hoursCompare, echo=FALSE}
-
+detailledMovesDiagram <<- FALSE
+for (rId in unique(trajectoriesDataset$recordingId)){
+  clusterDataset <<- trajectoriesDataset[recordingId==rId, ]
+  source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
+  source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R")
+}
 #source("~/TrajectoryAnalysisProject/code/analysis/04_countUsers.R", echo=FALSE)
 #print(traficTable)
 ```
