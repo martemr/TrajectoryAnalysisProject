@@ -20,10 +20,9 @@ library(png)
 #==========================================
 # Functions
 #==========================================
-addArrow <- function(tId, color='black', weigth){
+addArrow <- function(tId, color='black', weigth=4/30){
   x = unlist(trajectoriesDataset[trackId == tId, "xCenter"])
   y = unlist(trajectoriesDataset[trackId == tId, "yCenter"])
-  #weigth = length(clusters[clusters$clusterId == id, 'trackId']) / nrow(clusters)
   arrows(
     x0 = tail(x, n = 2)[1],
     x1 = tail(x, n = 2)[2],

@@ -10,8 +10,8 @@
 # Parametres
 #==========================================
 if(!exists("ClusteringClass")) ClusteringClass = 'car' # 'ALL' for all class
-if(!exists("clusterDataset")) clusterDataset <- trajectoriesDataset
-clusterDataset <- clusterDataset[clusterDataset$class==ClusteringClass,]
+if(!exists("recordingIdToSelect")) recordingIdToSelect <- unique(trajectoriesDataset$recordingId)
+clusterDataset <- trajectoriesDataset[recordingId %in% recordingIdToSelect & class==ClusteringClass,]
 
 #==========================================
 # Librairies
@@ -38,22 +38,22 @@ chooseRepresentativeId <- function(idList, method){
 # Clustering par origine et destinations
 #==========================================
 # Origine
-tracksMeta <- tracksMeta[clusterDataset[trackLifetime<5,.(origineHeading=mean(heading)),by = "trackId"]
+tracksMetaCluster <- tracksMeta[clusterDataset[trackLifetime<5,.(origineHeading=mean(heading)),by = "trackId"]
   , on='trackId'
   , nomatch=0]
 
 # Destination
-tracksMeta <- tracksMeta[
+tracksMetaCluster <- tracksMetaCluster[
   clusterDataset[tracksMeta[,.(trackId, lastFrame5=finalFrame-25)], on="trackId"][frame>lastFrame5,.(destinationHeading=mean(heading)),by=trackId], 
   on="trackId",
   nomatch=0]
 
 # Clustering
-clusteringResult <- dbscan::dbscan(scale(tracksMeta[,.(origineHeading,destinationHeading)]), eps = 0.20, minPts =  1)
-fviz_cluster(clusteringResult, data = scale(tracksMeta[,.(origineHeading,destinationHeading)])) # Affichage des clusters
+clusteringResult <- dbscan::dbscan(scale(tracksMetaCluster[,.(origineHeading,destinationHeading)]), eps = 0.20, minPts =  1)
+fviz_cluster(clusteringResult, data = scale(tracksMetaCluster[,.(origineHeading,destinationHeading)])) # Affichage des clusters
 
 # Récupération des clusters
-clusters <- data.table('trackId'=tracksMeta$trackId, 'clusterId'=clusteringResult$cluster)
+clusters <- data.table('trackId'=tracksMetaCluster$trackId, 'clusterId'=clusteringResult$cluster)
 
 # On ne garde que les clusters avec plus de 4 courbes
 clusters <- clusters[clusterId %in% clusters[,.(number=.N),by="clusterId"][number>4,clusterId]]
@@ -70,7 +70,7 @@ for (cId in unique(clusters$clusterId)) {
   
   size = length(unlist(clusters[clusterId == cId, 'trackId']))
   color = colors[cId]
-  idList = tracksMeta[trackId %in% unlist(clusters[clusterId == cId, 'trackId']), .(trackId,distanceTraveled,class)]
+  idList = tracksMetaCluster[trackId %in% unlist(clusters[clusterId == cId, 'trackId']), .(trackId,distanceTraveled,class)]
   tId = chooseRepresentativeId(idList, "mean_distance")
   
   clusterMeta <- rbind(clusterMeta, list(cId,size,tId,color))

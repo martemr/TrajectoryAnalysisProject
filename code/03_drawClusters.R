@@ -10,6 +10,7 @@
 # Tracé des clusters (Tout dans un seul graphe)
 #==========================================
 if(!exists("clusters")) stop("Il n'y a pas de clusters existants, faire tourner un algo de clustering d'abord")
+if(!exists("DetailledGraphCluster")) DetailledGraphCluster <- FALSE
 drawEmptyPlot("Clusters de trajectoires")
 colors = rainbow(n = n_distinct(clusters$clusterId)+10)
 for (id in unique(clusters$trackId)){

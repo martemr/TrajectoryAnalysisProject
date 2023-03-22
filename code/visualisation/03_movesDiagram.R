@@ -18,6 +18,8 @@
 if(!exists("indMaxAnnotation")) indMaxAnnotation = 0.50
 if(!exists("clusters")) stop("Faire tourner une méthode de clustering d'abord")
 if(!exists("detailledMovesDiagram")) detailledMovesDiagram <- TRUE
+if(!exists("WithAnnotations")) WithAnnotations <- TRUE
+
 
 #==========================================
 # Librairies
@@ -32,7 +34,7 @@ plotCluster <- function(clusterId, size, representativeId, color){
   lines(unlist(trajectoriesDataset[trackId == as.numeric(representativeId), "xCenter"]),
         unlist(trajectoriesDataset[trackId == as.numeric(representativeId), "yCenter"]),
         lwd = as.numeric(size)*30/nrow(clusters), col = color)
-  addArrow(representativeId, color, as.numeric(size)/nrow(clusters))
+  addArrow(as.numeric(representativeId), color, as.numeric(size)/nrow(clusters))
 }
 
 #==========================================
@@ -41,7 +43,10 @@ plotCluster <- function(clusterId, size, representativeId, color){
 drawEmptyPlot("Diagramme des déplacements")
 # Tracé des clusters
 apply(clusterMeta,1, function(x) plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4])))
-#addAnnotations(clusterMeta, indMaxAnnotation, Type="veh/h")
+if(WithAnnotations){
+  addAnnotations(clusterMeta, indMaxAnnotation, Type="veh/h")
+}
+
 
 #==========================================
 # Tracé des courbes : Un graphe par cluster

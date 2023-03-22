@@ -1,3 +1,7 @@
+---
+---
+---
+
 # Définition d'un critère global de sécurité routiere par carrefour
 
 Pour cet exemple d'étude, nous utilisons un jeu de données Allemand, le dataset inD (<https://www.ind-dataset.com/>), datant de 2020.
@@ -28,7 +32,7 @@ Afin de simplifier l'étude et les calculs, nous appliquons plusieurs traitement
 
 -   Enfin, nous divisons les échantillons par 5. Chaque 5 frames est agregé en 1 frame par la moyenne des 5.
 
-```{r Init, echo=FALSE}
+```{r Init, echo=FALSE, message=FALSE, warning=FALSE}
 source("~/TrajectoryAnalysisProject/code/00_init.r", echo=FALSE)
 source("~/TrajectoryAnalysisProject/code/visualisation/00_visualisationInit.R", echo=FALSE)
 ```
@@ -89,6 +93,7 @@ Ci-dessous sont détaillés les flux de véhicules sur le cumul des enregistreme
 ClusteringClass <<- 'car'
 StudiedClass <<- 'car'
 detailledMovesDiagram <<- TRUE
+WithAnnotations <<- FALSE
 source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R", echo=FALSE)
 ```
 
@@ -113,13 +118,19 @@ source("~/TrajectoryAnalysisProject/code/analysis/05_stopZones.R", echo=FALSE)
 
 ### Comparaison de la circulation par horaires
 
+Les circulations et utilisation de la route peuvent varier en fonction des horaires, voici donc les flux en fonction du moment de la journée.
+
+TODO
+
 ```{r hoursCompare, echo=FALSE}
 detailledMovesDiagram <<- FALSE
+WithAnnotations <<- TRUE
 for (rId in unique(trajectoriesDataset$recordingId)){
-  clusterDataset <<- trajectoriesDataset[recordingId==rId, ]
+  recordingIdToSelect <<- rId
   source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
   source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R")
 }
+
 #source("~/TrajectoryAnalysisProject/code/analysis/04_countUsers.R", echo=FALSE)
 #print(traficTable)
 ```
@@ -146,16 +157,10 @@ ClusteringClass <<- 'bicycle'
 StudiedClass <<- 'bicycle'    
 
 source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
-# 
 source("~/TrajectoryAnalysisProject/code/03_drawClusters.R", echo=FALSE)
-
 source("~/TrajectoryAnalysisProject/code/visualisation/03_movesDiagram.R", echo=FALSE)
 
 ```
-
-### Flux
-
-### Infractions ?
 
 ### Temps passé sur la chaussée
 
