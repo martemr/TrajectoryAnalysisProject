@@ -23,110 +23,123 @@ library(concaveman)
 library(sp)
 
 
-# On ne prend que les données d'un enregistrement
-studiedDatasetRecording <- trajectoriesDataset[trackId<100000,]
-interractionList <- vector()
+#==========================================
+# Fonctions de sélection des ID
+#==========================================
+# TRI PAR TEMPORALITE -----
+selectSameTimeId <- function(studiedTrackId, idToFilter=unique(studiedDatasetRecording$trackId)){
+  idToFilter[idToFilter %in% unique(studiedDatasetRecording[frame > min(studiedDatasetRecording[trackId == studiedTrackId,frame]) & 
+                                              frame < max(studiedDatasetRecording[trackId == studiedTrackId,frame]) 
+                                              ,trackId])]
+}
+# -------------------------
 
-
-drawEmptyPlot("")
-for(studiedTrackId in unique(clusters[clusterId == 2 & trackId<100000, trackId])){
-#for(studiedTrackId in unique(studiedDatasetRecording[,trackId])){
-   #studiedTrackId = 51
-      
-      
-      
-  # Selection des trajectoires qui sont au même moment
-  idOtherTraj <- unique(studiedDatasetRecording[frame > min(studiedDatasetRecording[trackId==studiedTrackId,frame]) & 
-                                       frame < max(studiedDatasetRecording[trackId==studiedTrackId,frame]) 
-                                       ,trackId])
-  
-  # Détermine la zone englobante de la trajectoire
-  size=5
+# TRI PAR ESPACE ----------
+selectSameSpace <- function(studiedTrackId, idToFilter=unique(studiedDatasetRecording$trackId), areaSize=5, plotArea=FALSE){ # areaSize = X metres de chaque coté de la trajectoire
+  # Détermine la zone englobante de la trajectoire (zone d'interraction)
   countourPoints <- rbind(
-    as.matrix(studiedDatasetRecording[trackId==studiedTrackId, .(x=xCenter+size*cos((heading+90)*pi/180), 
-                                                  y=yCenter+size*sin((heading+90)*pi/180), frame)]),
-    as.matrix(studiedDatasetRecording[trackId==studiedTrackId, .(x=xCenter+size*cos((heading-90)*pi/180), 
-                                                  y=yCenter+size*sin((heading-90)*pi/180), frame)]))
+    as.matrix(studiedDatasetRecording[trackId==studiedTrackId, .(x=xCenter+areaSize*cos((heading+90)*pi/180), 
+                                                                 y=yCenter+areaSize*sin((heading+90)*pi/180), frame)]),
+    as.matrix(studiedDatasetRecording[trackId==studiedTrackId, .(x=xCenter+areaSize*cos((heading-90)*pi/180), 
+                                                                 y=yCenter+areaSize*sin((heading-90)*pi/180), frame)]))
   polygonShape <- concaveman(countourPoints)
-  
-  # drawEmptyPlot("")
-  # lines(as.matrix(studiedDatasetRecording[trackId==studiedTrackId, .(x=xCenter, y=yCenter)]), col='blue')
-  # lines(polygonShape,col='red')
-  
+  if(plotArea) lines(polygonShape, col='red')
+
   # Selectionne les trajectoires dans la zone englobante
-  subsetOtherTraj <- studiedDatasetRecording[trackId %in% idOtherTraj,]
-  idOtherTrajFiltered <- unique(subsetOtherTraj[as.logical(point.in.polygon(
-    unlist(subsetOtherTraj[, .(xCenter)]),
-    unlist(subsetOtherTraj[, .(yCenter)]), 
+  unique(studiedDatasetRecording[trackId %in% idToFilter & as.logical(point.in.polygon(
+    unlist(studiedDatasetRecording[trackId %in% idToFilter, .(xCenter)]),
+    unlist(studiedDatasetRecording[trackId %in% idToFilter, .(yCenter)]),
     polygonShape[, 1],
     polygonShape[, 2]
   )), trackId])
-  idOtherTrajFiltered <- idOtherTrajFiltered[!idOtherTrajFiltered==studiedTrackId]
-  
-   #studiedDatasetRecording[]
-  
-  # for (id in idOtherTrajFiltered){
-  #   x = unlist(studiedDatasetRecording[studiedDatasetRecording$trackId==id ,'xCenter'])
-  #   y = unlist(studiedDatasetRecording[studiedDatasetRecording$trackId==id ,'yCenter'])
-  #   inside <- as.logical(point.in.polygon(x, y, polygonShape[, 1], polygonShape[, 2]))
-  #   points(x[inside], 
-  #         y[inside], col='orange', pch=19)
-  # }
-  
-  
-  # Calcul de la matrice de distance par frame V1
+}
+# -------------------------
+
+# TRI PAR DISTANCES ENTRE POINTS
+selectClosestPoints <- function(studiedTrackId, idList, distTreshold = 21){
+  # Matrice de distance : lignes=frames, colonnes=Trajectoires
   distMatrixByFrame <- matrix(
     nrow = n_distinct(studiedDatasetRecording[trackId==studiedTrackId, frame]), 
-    ncol = n_distinct(idOtherTrajFiltered),
+    ncol = n_distinct(idList),
   )
-  
-  euclidianDistance <- function(a,b){
-    if(length(b)==0){
-      NA
-    } else {
-      sqrt((a[1]-b[1])^2+(a[2]-b[2])^2)  
-    }
-  }
-  
+  # Calcul de la matrice
   for (f in unique(studiedDatasetRecording[trackId==studiedTrackId, frame])){
-    for(tId in idOtherTrajFiltered){
-      dist <- euclidianDistance(
-        unlist(studiedDatasetRecording[trackId==studiedTrackId & frame==f,.(xCenter, yCenter)]),
-        unlist(studiedDatasetRecording[trackId==tId & frame==f,.(xCenter, yCenter)]))
-      
-        distMatrixByFrame[which(studiedDatasetRecording[trackId==studiedTrackId, frame]==f), 
-                          which(idOtherTrajFiltered==tId)] <- dist
+    for(tId in idList){
+      distMatrixByFrame[
+        which(studiedDatasetRecording[trackId==studiedTrackId, frame]==f),
+        which(idList==tId)
+        ] <- euclidean(unlist(studiedDatasetRecording[trackId == studiedTrackId & frame == f, .(xCenter, yCenter)]),
+                       unlist(studiedDatasetRecording[trackId == tId            & frame == f, .(xCenter, yCenter)]))
     }
   }
-  ######################################
-  
-  indexList = which(distMatrixByFrame < 21)
-  couplesInterractions <- data.table(frame=unique(studiedDatasetRecording[trackId==studiedTrackId, frame])
-                                       [trunc((indexList-1)%%nrow(distMatrixByFrame))+1], 
-                                     id=idOtherTrajFiltered[trunc((indexList-1)/nrow(distMatrixByFrame))+1])
+  # Sélection des éléments proches (seuil de distance)
+  indexList = which(distMatrixByFrame < distTreshold)
+  couplesInterractions <- data.table(frame = unique(studiedDatasetRecording[trackId==studiedTrackId, frame])[trunc((indexList-1)%%nrow(distMatrixByFrame))+1], 
+                                     id    = idList[trunc((indexList-1)/nrow(distMatrixByFrame))+1])
   couplesInterractionsXY <- studiedDatasetRecording[couplesInterractions, .(frame, trackId,xCenter,yCenter), on=.(frame=frame,trackId=id)]
-    
-  # Affichage des interractions
-  print(paste(studiedTrackId, n_distinct(couplesInterractionsXY[,trackId])))
+  couplesInterractionsXY[!is.na(couplesInterractionsXY$xCenter)]
+}
+
+#==========================================
+# Fonction d'affichage des interractions
+#==========================================
+printInterractions <- function(studiedTrackId, couplesInterractionsXY){
   if (n_distinct(couplesInterractionsXY[,trackId])>0){
-    #print(paste("Il y a", n_distinct(couplesInterractionsXY[,trackId]), "objets avec lequels il y a interraction"))
-  
-    #drawEmptyPlot("")
-    lines(studiedDatasetRecording[trackId==studiedTrackId, .(x=xCenter, y=yCenter)], col='blue')
-    for(id in idOtherTrajFiltered){
-      #drawEmptyPlot("")
-      lines(studiedDatasetRecording[trackId==id, .(x=xCenter, y=yCenter)], col='red')
-  
+    drawEmptyPlot("")
+    # Tracé de la trajectoire étudiée
+    lines(studiedDatasetRecording[trackId==studiedTrackId, .(x=xCenter, y=yCenter)], col='green', lwd=6)
+    addArrow(studiedTrackId, color='green')
+    # Tracé des interractions
+    cnt=1
+    for(id in unique(couplesInterractionsXY[,trackId])){
+      color=rainbow(15)[cnt]
+      lines(studiedDatasetRecording[trackId==id, .(x=xCenter, y=yCenter)], col=color, lwd=4)
+      addArrow(id, color=color)
+      
+      # Affichage des points où il y a interraction et leurs liens
+      points(studiedDatasetRecording[trackId==studiedTrackId & frame %in% couplesInterractionsXY[trackId==id & !is.na(xCenter),frame], .(x=xCenter, y=yCenter)], col=color, pch=19)
+      points(studiedDatasetRecording[trackId==id             & frame %in% couplesInterractionsXY[trackId==id & !is.na(xCenter),frame], .(x=xCenter, y=yCenter)], col=color, pch=19)
       for (f in couplesInterractionsXY[trackId==id,frame]){
-        lines(studiedDatasetRecording[frame==f& trackId %in% c(studiedTrackId,id),.(xCenter, yCenter)])
+        lines(studiedDatasetRecording[frame==f& trackId %in% c(studiedTrackId,id),.(xCenter, yCenter)], col=color)
       }
-      points(studiedDatasetRecording[trackId==studiedTrackId & frame %in% couplesInterractionsXY[trackId==id,frame], .(x=xCenter, y=yCenter)], col='blue')
-      points(studiedDatasetRecording[trackId==id & frame %in% couplesInterractionsXY[trackId==id,frame], .(x=xCenter, y=yCenter)], col='red')
+      cnt=cnt+1
     }
   }
-  # number = n_distinct(couplesInterractions$id)
-  # names(number) <- studiedTrackId
-  # interractionList <- c(interractionList, number)
-  #print(paste(studiedTrackId, number))
+}
+
+
+#==========================================
+# Affichage des interractions d'une trajectoire
+#==========================================
+plotTrackInterractions <- function(studiedTrackId){
+  # On ne va s'intéresser qu'aux trajectoires qui ne sont pas dans le même cluster
+  idList <- unique(studiedDatasetRecording[
+    class %in% c("pedestrian","bicycle") & # QUE PIETONS ET VELOS
+      !(trackId %in% clusters[clusterId==1, trackId]), # PAS DANS LE MEME CLUSTER 
+    trackId])
+  
+  idList <- selectSameTimeId(studiedTrackId, idList) 
+  # idList <- idList[idList != studiedTrackId] # On enleve la trajectoire étudié du dataset
+  #print(paste("Trajectoires au même moment :",list(idList)))
+  
+  idList <- selectSameSpace(studiedTrackId, idList)
+  #print(paste("Trajectoires au même endroit", list(idList)))
+  
+  couplesInterractionsXY <- selectClosestPoints(studiedTrackId, idList)
+  #print(paste("La trajectoire", studiedTrackId, "a un interraction avec la trajectoire", list(unique(couplesInterractionsXY$trackId))))
+  
+  printInterractions(studiedTrackId, couplesInterractionsXY)
+}
+
+
+
+#==========================================
+# Etude des interraction pour 1 enregistrement
+#==========================================
+# Selection des données à analyser
+studiedRecordId = 0
+studiedDatasetRecording <- trajectoriesDataset[recordingId==studiedRecordId,]
+for (i in clusters[clusterId==1, trackId]){
+  plotTrackInterractions(i)
 }
 
