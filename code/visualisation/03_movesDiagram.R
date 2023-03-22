@@ -15,8 +15,9 @@
 #==========================================
 # Parametres
 #==========================================
-if(!exists("indMaxAnnotation")) indMaxAnnotation = 10
+if(!exists("indMaxAnnotation")) indMaxAnnotation = 0.50
 if(!exists("clusters")) stop("Faire tourner une méthode de clustering d'abord")
+if(!exists("detailledMovesDiagram")) detailledMovesDiagram <- TRUE
 
 #==========================================
 # Librairies
@@ -25,54 +26,40 @@ library(dplyr)
 library(arrow)
 
 #==========================================
-# Functions
+# Fonction qui trace un cluster en fonction de ses métadonnées
 #==========================================
-chooseRepresentativeId <- function(idList, method){
-  if (method=='max'){
-    tId = unlist(idList[idList$distanceTraveled == max(idList$distanceTraveled) & (idList$class == "car"), 'trackId'])
-  } else if (method=='random'){
-    tId=sample(idList$trackId,1)
-  } else if (method=='mean_interpolation'){
-    stop("Method not implemented yet")
-  } else if (method=='mean_distance'){
-    tId=idList[which.min(abs(idList$distanceTraveled-mean(idList$distanceTraveled))), trackId]
-  }
-  
+plotCluster <- function(clusterId, size, representativeId, color){
+  lines(unlist(trajectoriesDataset[trackId == as.numeric(representativeId), "xCenter"]),
+        unlist(trajectoriesDataset[trackId == as.numeric(representativeId), "yCenter"]),
+        lwd = as.numeric(size)*30/nrow(clusters), col = color)
+  addArrow(representativeId, color, as.numeric(size)/nrow(clusters))
 }
 
-
 #==========================================
-# Tracé des courbes
+# Tracé des courbes : Tous sur un graphe
 #==========================================
 drawEmptyPlot("Diagramme des déplacements")
-colors = rainbow(n = n_distinct(clusters$clusterId))
-resetAnnotations()
+# Tracé des clusters
+apply(clusterMeta,1, function(x) plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4])))
+#addAnnotations(clusterMeta, indMaxAnnotation, Type="veh/h")
 
-for (cId in unique(clusters$clusterId)) {
-  
-  weigth = length(unlist(clusters[clusterId == cId, 'trackId'])) / nrow(clusters)
-  color = colors[cId]
-  idList = tracksMeta[trackId %in% unlist(clusters[clusterId == cId, 'trackId']), .(trackId,distanceTraveled,class)]
-  
-  tId = chooseRepresentativeId(idList, "mean_distance")
-  x = unlist(trajectoriesDataset[trackId == tId, "xCenter"])
-  y = unlist(trajectoriesDataset[trackId == tId, "yCenter"])
-  
-  lines(x, y, lwd = weigth*30, col = color)
-  addArrow(tId, color, weigth)
-  
-  # Store values of annotations
-  storeAnnotations(tId, cId, color, Type="veh/h")
-  if(detailledMovesDiagram){
-    addAnnotations(indMaxAnnotation)
-    resetAnnotations()
-    drawEmptyPlot(paste("Trajectoire :"), cId)
-  }
+#==========================================
+# Tracé des courbes : Un graphe par cluster
+#==========================================
+if(detailledMovesDiagram){
+  # Tracé des clusters
+  apply(clusterMeta, 1, function(x) {
+    drawEmptyPlot(paste("Trajectoire", x[1]))
+    plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4]))
+    addAnnotations(clusterMeta = (
+      data.table(
+        clusterId = as.numeric(x[1]),
+        size = as.numeric(x[2]),
+        representativeId = as.numeric(x[3]),
+        color = x[4]
+      )
+    ),
+    indMaxAnnotation,
+    Type = "veh/h")
+  })
 }
-
-
-#==========================================
-# Ajout des annotations
-#==========================================
-addAnnotations(indMaxAnnotation)
-

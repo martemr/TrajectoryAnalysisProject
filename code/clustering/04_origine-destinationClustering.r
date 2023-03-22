@@ -10,13 +10,29 @@
 # Parametres
 #==========================================
 if(!exists("ClusteringClass")) ClusteringClass = 'car' # 'ALL' for all class
-clusterDataset <- trajectoriesDataset[trajectoriesDataset$class==ClusteringClass,]
+if(!exists("clusterDataset")) clusterDataset <- trajectoriesDataset
+clusterDataset <- clusterDataset[clusterDataset$class==ClusteringClass,]
 
 #==========================================
 # Librairies
 #==========================================
 library(dbscan)
 library(factoextra)
+
+#==========================================
+# Functions
+#==========================================
+chooseRepresentativeId <- function(idList, method){
+  if (method=='max'){
+    tId = unlist(idList[idList$distanceTraveled == max(idList$distanceTraveled) & (idList$class == "car"), 'trackId'])
+  } else if (method=='random'){
+    tId=sample(idList$trackId,1)
+  } else if (method=='mean_interpolation'){
+    stop("Method not implemented yet")
+  } else if (method=='mean_distance'){
+    tId=idList[which.min(abs(idList$distanceTraveled-mean(idList$distanceTraveled))), trackId]
+  }
+}
 
 #==========================================
 # Clustering par origine et destinations
@@ -44,6 +60,21 @@ clusters <- clusters[clusterId %in% clusters[,.(number=.N),by="clusterId"][numbe
 clusters <- data.table(clusterId=match(clusters$clusterId, unique(clusters$clusterId)), trackId=clusters$trackId) # Replace clusters values by 1 -> max values
 print(paste("Il y a", n_distinct(clusters$clusterId), "trajectoires différentes"))
 clusterDataset <- clusterDataset[clusters, on=.(trackId)]
+
+#==========================================
+# Ajout des métadonnées des clusters
+#==========================================
+clusterMeta <- data.table(clusterId=numeric(), size=numeric(),representativeId=numeric(), color=character())
+colors=rainbow(n_distinct(clusters$clusterId))
+for (cId in unique(clusters$clusterId)) {
+  
+  size = length(unlist(clusters[clusterId == cId, 'trackId']))
+  color = colors[cId]
+  idList = tracksMeta[trackId %in% unlist(clusters[clusterId == cId, 'trackId']), .(trackId,distanceTraveled,class)]
+  tId = chooseRepresentativeId(idList, "mean_distance")
+  
+  clusterMeta <- rbind(clusterMeta, list(cId,size,tId,color))
+}
 
 #==========================================
 # Nettoyage environnement
