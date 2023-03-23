@@ -42,6 +42,7 @@ plotCluster <- function(clusterId, size, representativeId, color){
 #==========================================
 drawEmptyPlot("Diagramme des déplacements")
 # Tracé des clusters
+setorder(clusterMeta, cols = -"size")     
 apply(clusterMeta,1, function(x) plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4])))
 if(WithAnnotations){
   addAnnotations(clusterMeta, indMaxAnnotation, Type="veh/h")
