@@ -16,10 +16,10 @@ initPlotImage <- function(LocationId){
                  '3' = 10.2, 
                  '4' = 6.5)
   bgName <<- switch(LocationId, 
-                    '1' = sprintf("%s%02d_background.png", dosinit, 0), 
-                    '2' = sprintf("%s%02d_background.png", dosinit, 7), 
-                    '3' = sprintf("%s%02d_background.png", dosinit, 18), 
-                    '4' = sprintf("%s%02d_background.png", dosinit, 30))
+                    '1' = sprintf("%s%02d_background.png", dosinit, 7), 
+                    '2' = sprintf("%s%02d_background.png", dosinit, 18), 
+                    '3' = sprintf("%s%02d_background.png", dosinit, 30), 
+                    '4' = sprintf("%s%02d_background.png", dosinit, 0))
   
   bg_image <<- readPNG(bgName)
   xlim <<- c(0, dim(bg_image)[2]/fact)
@@ -50,3 +50,26 @@ drawVector <- function(x,y,angle,size=10, col='blue'){
         y1=(y + size * sin(angle)),
          lwd = 2, col = col)
 }
+
+#==========================================
+# Tracé des trajectoires
+#==========================================
+drawTrajectories <- function(AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL'){
+  if(AllTrajectoriesOnOneGraph){
+    drawEmptyPlot("All trajectories")
+  }
+  for (cl in unique(trajectoriesDataset$class))
+  {
+    if (!AllTrajectoriesOnOneGraph) drawEmptyPlot(paste("Trajectories of", cl))
+    for (tId in unique(trajectoriesDataset[class == cl, trackId])) {
+      lines(unlist(trajectoriesDataset[trackId == tId, xCenter]),
+            unlist(trajectoriesDataset[trackId == tId, yCenter]),
+            col = (switch(cl, 
+                          'car'='red', 
+                          'truck_bus'='yellow',
+                          'pedestrian'='blue',
+                          'bicycle'='green')))
+    }
+  }
+}
+
