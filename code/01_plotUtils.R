@@ -7,27 +7,27 @@
 ##---------------------------------------------
 
 #==========================================
-# Définition des paramètres
+# Initialisation des paramêtres
 #==========================================
-bgName <- sprintf("%s%02d_background.png", dosinit, RecordNumbers[1])
-
-if(LocationId==1){
-  fact= 10.2
-} else if(LocationId==2){
-  fact=10.2
-} else if(LocationId==3){
-  fact=10.2
-} else if(LocationId==4){
-  fact=6.5
+initPlotImage <- function(LocationId){
+  fact <- switch(LocationId, 
+                 '1' = 10.2,
+                 '2' = 10.2, 
+                 '3' = 10.2, 
+                 '4' = 6.5)
+  bgName <<- switch(LocationId, 
+                    '1' = sprintf("%s%02d_background.png", dosinit, 0), 
+                    '2' = sprintf("%s%02d_background.png", dosinit, 7), 
+                    '3' = sprintf("%s%02d_background.png", dosinit, 18), 
+                    '4' = sprintf("%s%02d_background.png", dosinit, 30))
+  
+  bg_image <<- readPNG(bgName)
+  xlim <<- c(0, dim(bg_image)[2]/fact)
+  ylim <<- c(-dim(bg_image)[1]/fact, 0)
 }
 
-# Lecture de l'image et des dimensions
-bg_image <- readPNG(bgName)
-xlim = c(0, dim(bg_image)[2]/fact)
-ylim = c(-dim(bg_image)[1]/fact, 0)
-
 #==========================================
-# Functions
+# Tracé d'un graphe vide
 #==========================================
 drawEmptyPlot <- function(PlotName,Background=TRUE){
   plot(NULL,xlim=xlim,ylim=ylim,axes=T,xlab="X",ylab="Y",main=PlotName)
@@ -40,7 +40,7 @@ drawEmptyPlot <- function(PlotName,Background=TRUE){
 }
 
 #==========================================
-# Vectors
+# Tracé d'un vecteur
 #==========================================
 drawVector <- function(x,y,angle,size=10, col='blue'){
   angle = angle * (pi / 180)
