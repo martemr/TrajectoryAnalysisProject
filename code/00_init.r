@@ -6,18 +6,6 @@
 # Description : Initialisation des données
 ##---------------------------------------------
 
-
-#==========================================
-# Parametres
-#==========================================
-## Chemins  
-if(!exists("LocationId") ) {LocationId <- 1}
-if(!exists("StudiedClass")) StudiedClass = 'car' # 'ALL' for all class
-if(!exists("distanceMin"))  distanceMin = 15 # Filtre de distance minimum à parcourir
-dosinit <- "./data/"
-trajectoryIdMax = NA # NA for all trajectories
-SimplifyData = TRUE
-
 #==========================================
 # Librairies
 #==========================================
@@ -73,6 +61,7 @@ loadData <- function(dosinit, LocationId){
   
   tracks <<- tracks
   tracksMeta <<- tracksMeta
+  recordingMeta <<- recordingMeta
   print("Chargement des données terminé")
 }
 
