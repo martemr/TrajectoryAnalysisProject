@@ -30,42 +30,48 @@ library(arrow)
 #==========================================
 # Fonction qui trace un cluster en fonction de ses métadonnées
 #==========================================
-plotCluster <- function(clusterId, size, representativeId, color){
+plotCluster <- function(clusterId, size, representativeId, color, drawBackground=FALSE, addAnnotation=FALSE){
+  if(drawBackground) drawEmptyPlot(paste("Flux cluster", clusterId))  
   lines(unlist(trajectoriesDataset[trackId == as.numeric(representativeId), "xCenter"]),
         unlist(trajectoriesDataset[trackId == as.numeric(representativeId), "yCenter"]),
         lwd = as.numeric(size)*30/nrow(clusters), col = color)
   addArrow(as.numeric(representativeId), color, as.numeric(size)/nrow(clusters))
+  if(addAnnotation) addAnnotations(clusterMeta, indMaxAnnotation, Type="veh/h")
 }
 
 #==========================================
 # Tracé des courbes : Tous sur un graphe
 #==========================================
-drawEmptyPlot("Diagramme des déplacements")
-# Tracé des clusters
-setorder(clusterMeta, cols = -"size")     
-apply(clusterMeta,1, function(x) plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4])))
-if(WithAnnotations){
-  addAnnotations(clusterMeta, indMaxAnnotation, Type="veh/h")
+flowDiagram <- function(clusterMeta, indMaxAnnotation=0, WithAnnotations=TRUE, allFlowOnOneGraph=TRUE){
+  setorder(clusterMeta, cols = -"size") # Tri par taille
+  if(allFlowOnOneGraph) {
+    drawEmptyPlot("Flux de déplacements")
+    apply(clusterMeta,1, function(x) plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4]), drawBackground = FALSE, addAnnotation=FALSE))
+    if(WithAnnotations) addAnnotations(clusterMeta, indMaxAnnotation, Type="veh/h")
+  } else {
+    apply(clusterMeta,1, function(x) plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4]), drawBackground = TRUE, addAnnotation=WithAnnotations))
+  }
 }
+
 
 
 #==========================================
 # Tracé des courbes : Un graphe par cluster
 #==========================================
-if(detailledMovesDiagram){
-  # Tracé des clusters
-  apply(clusterMeta, 1, function(x) {
-    drawEmptyPlot(paste("Trajectoire", x[1]))
-    plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4]))
-    addAnnotations(clusterMeta = (
-      data.table(
-        clusterId = as.numeric(x[1]),
-        size = as.numeric(x[2]),
-        representativeId = as.numeric(x[3]),
-        color = x[4]
-      )
-    ),
-    indMaxAnnotation,
-    Type = "veh/h")
-  })
-}
+# if(detailledMovesDiagram){
+#   # Tracé des clusters
+#   apply(clusterMeta, 1, function(x) {
+#     drawEmptyPlot(paste("Trajectoire", x[1]))
+#     plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4]))
+#     addAnnotations(clusterMeta = (
+#       data.table(
+#         clusterId = as.numeric(x[1]),
+#         size = as.numeric(x[2]),
+#         representativeId = as.numeric(x[3]),
+#         color = x[4]
+#       )
+#     ),
+#     indMaxAnnotation,
+#     Type = "veh/h")
+#   })
+# }

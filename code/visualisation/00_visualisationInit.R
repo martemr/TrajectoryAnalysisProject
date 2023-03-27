@@ -40,11 +40,12 @@ euclidean <- function(a, b) sqrt(sum((a - b)^2))
 # Find best positions to add annotations and add them
 #==========================================
 addAnnotations <- function(clusterMeta, indMaxAnnotation, Type="veh/h"){
+  LocationId=clusterMeta
   # Détermine la valeur à afficher
   if(Type=="percentages"){
     clusterMeta[,'annotation'] <- paste(round(clusterMeta$size*100/nrow(clusters),2),"%", sep="")
   } else if (Type=='veh/h'){
-    clusterMeta[,'annotation'] <- paste(round(clusterMeta$size/(unlist(sum(recordingMeta[locationId == LocationId,'duration']))/60), 0),"veh/h", sep = "")
+  #  clusterMeta[,'annotation'] <- paste(round(clusterMeta$size/(unlist(sum(recordingMeta[locationId == LocationId,'duration']))/60), 0),"veh/h", sep = "")
   }
   
   
@@ -79,7 +80,7 @@ addAnnotations <- function(clusterMeta, indMaxAnnotation, Type="veh/h"){
   text(
     x = xyAnnotations[,1],
     y = xyAnnotations[,2],
-    labels = clusterMeta$annotation,
+    labels = clusterMeta$'annotation(veh/h)',
     col = 'black'
   )
 }

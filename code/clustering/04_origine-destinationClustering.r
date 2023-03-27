@@ -70,7 +70,7 @@ createClusters <- function(tracksMeta, minSizecluster=4, ClusteringClass='car'){
 #==========================================
 # Ajout des métadonnées des clusters
 #==========================================
-getClusterMeta <- function(tracksMeta, clusters){
+getClusterMeta <- function(tracksMeta, clusters, LocId){
   clusterMeta <- data.table(clusterId=numeric(), size=numeric(),representativeId=numeric(), color=character())
   colors=rainbow(n_distinct(clusters$clusterId))
   for (cId in unique(clusters$clusterId)) {
@@ -80,5 +80,7 @@ getClusterMeta <- function(tracksMeta, clusters){
     tId = chooseRepresentativeId(idList, "mean_distance")
     clusterMeta <- rbind(clusterMeta, list(cId,size,tId,color))
   }
+  if(unique(tracksMeta[trackId %in% clusters$trackId, class])=='pedestrian') type="ped/h" else type="veh/h"
+  clusterMeta[,'annotation(veh/h)'] <- paste(round(clusterMeta$size/(unlist(sum(recordingMeta[locationId == LocId,'duration']))/60), 0),type, sep = "")
   clusterMeta
 }
