@@ -99,7 +99,8 @@ ui <-
                       ),
                       
                       mainPanel(
-                        plotOutput("classTrajectoire")
+                        plotOutput("classTrajectoire"),
+                        plotOutput("clusterTrajectoire")
                       )
              ),
   )
@@ -110,17 +111,13 @@ ui <-
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
   # Définition des variables étudiés par les widgets
-  print("INITIALISATION")
+  print("Initialisation des fonctions")
   source("~/TrajectoryAnalysisProject/code/00_init.r", echo=FALSE)
   source("~/TrajectoryAnalysisProject/code/01_plotUtils.R", echo=FALSE)
-  print("DONE")
+  source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo=FALSE)
+  print(" → Fonctions initialisés")
   
-  # output$textPresentation <- renderText(
-  #   "Pour cet exemple d'étude, nous utilisons un jeu de données Allemand, le dataset inD (",h2("https://www.ind-dataset.com"),", datant de 2020.
-  #   Il comprend 32 enregistrements, filmé par des drônes au dessus de 4 carrefours différents. Chaque enregistrement est déjà pré-traité : Il y a 4 usagers différents : piétons, voitures, bus/camion, vélos. Les vidéos sont découpés en 25 image par secondes (frames). Chaque usager est détecté sur l'image. Le jeu de donnée est donc un ensemble de lignes (plusieurs millions) où chaque ligne est un usager et les variables qui le décrivent (type, position, vitesse, etc.) situé dans une image, elle même situé dans l'ensemble de vidéo.
-  #   Le jeu de donnée ne nous donne pas accès aux vidéos originales."
-  # )
-  
+  # 0 : Page présentation
   output$ceremaImage <- renderImage({
     filename <- '/images/logoCerema.png'
     list(src = paste(getwd(),filename, sep=""),
@@ -131,67 +128,75 @@ server <- function(input, output) {
     list(src = paste(getwd(),"/images/plaquette.png", sep=""),
          contentType = '', alt="cerema")
   }, deleteFile = FALSE)
+  
+  #test <- reactiveVal()
 
   # 1: Infos générales
   output$infoArray <- renderDataTable({
-    print("Loading info array")
     LocId <- input$LocalisationId
+    dosinit <- input$dosinit
+    loadData(dosinit, LocId)
     recordingMeta[locationId==LocId,
                              .("ID"=recordingId,
                                "Jour d'enregistrement"=weekday,
                                'Heure de début'=paste(startTime,"h00",sep=""),
                                'Durée (min)'=paste(round(duration/60,0),"min"),
-                               'Usagers observés'=numVehicles)] 
+                               'Usagers observés'=numVehicles)]
   })
   
   output$countArray <- renderDataTable({
     LocId <- input$LocalisationId
-    if("3" %in% input$dataToPrint){
-        totalTime = unlist(sum(recordingMeta[locationId==LocId,'duration']))/3600
-        data.table("Type"=c("Véhicules", "Piétons", "Cyclistes", "Total"),
-                   "Comptage" = c(
-                     paste(round((n_distinct(trajectoriesDataset[class %in% c('car','truck_bus'), 'trackId'])/ totalTime), 0), 'usagers/heure'),
-                     paste(round((n_distinct(trajectoriesDataset[class == 'pedestrian'          , 'trackId'])/ totalTime), 0), 'usagers/heure'),
-                     paste(round((n_distinct(trajectoriesDataset[class == 'bicycle'             , 'trackId'])/ totalTime), 0), 'usagers/heure'),
-                     paste(round((n_distinct(trajectoriesDataset$trackId)/totalTime),0),'usagers/heure')))
-        }
-  })
+    totalTime = unlist(sum(recordingMeta[locationId==LocId,'duration']))/60
+    data.table("Type"=c("Véhicules", "Piétons", "Cyclistes", "Total"),
+               "Comptage" = c(
+                 paste(round((n_distinct(trajectoriesDataset[class %in% c('car','truck_bus'), 'trackId'])/ totalTime), 0), 'usagers/heure'),
+                 paste(round((n_distinct(trajectoriesDataset[class == 'pedestrian'          , 'trackId'])/ totalTime), 0), 'usagers/heure'),
+                 paste(round((n_distinct(trajectoriesDataset[class == 'bicycle'             , 'trackId'])/ totalTime), 0), 'usagers/heure'),
+                 paste(round((n_distinct(trajectoriesDataset$trackId)/totalTime),0),'usagers/heure')))
+    })
 
   output$zoneEtude <-
-    renderPlot(#height = 500, width = 800, 
-               {
-      if("1" %in% input$dataToPrint) {
+    renderPlot({
+        print("Chargement zone d'étude")
+        dosinit <- input$dosinit
         LocId <- input$LocalisationId
-        initPlotImage(LocId) # Initialisation de l'image
+        loadData(dosinit, LocId)
+        trajectoriesDataset <<- cleanDataset(input$DistanceMin)
+        initPlotImage(LocId, dosinit) # Initialisation de l'image
         drawEmptyPlot("Zone d'étude")
-      }
+        print(" → done")
     })
 
   output$trajectoires <-
     renderCachedPlot({
       dosinit <- input$dosinit
       LocId <- input$LocalisationId
-      initPlotImage(LocId) # Initialisation de l'image
-      loadData(dosinit, LocId)
-      trajectoriesDataset <<- cleanDataset(input$DistanceMin)
       par(mfrow = c(2, 2))
       drawTrajectories(FALSE)
     }, 
-    cacheKeyExpr = {list(input$dataToPrint, input$LocalisationId)})
+    cacheKeyExpr = {list(input$LocalisationId)})
+  
   
   # 2: Etude de véhicule
   output$classTrajectoire <-
     renderCachedPlot({
       dosinit <- input$dosinit
       LocId <- input$LocalisationId
-      initPlotImage(LocId) # Initialisation de l'image
       loadData(dosinit, LocId)
       trajectoriesDataset <<- cleanDataset(input$DistanceMin)
       class <-input$classId
-      
       drawTrajectories(AllTrajectoriesOnOneGraph = TRUE, StudiedClass = class)
     },
     cacheKeyExpr = {list(input$classId, input$LocalisationId)})
+  
+  output$clusterTrajectoire <- renderCachedPlot({
+    LocId <- input$LocalisationId
+    class <-input$classId
+    clusters     <<- createClusters(tracksMeta, ClusteringClass = class)
+    clusterMeta <<- getClusterMeta(tracksMeta, clusters)
+    drawClusters(clusters, clusterMeta, AllTrajectoriesOnOneGraph = TRUE)
+  },
+  cacheKeyExpr = {list(input$classId, input$LocalisationId)})
 }
 
 
