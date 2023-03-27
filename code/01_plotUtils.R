@@ -58,7 +58,9 @@ drawTrajectories <- function(AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL
   if(AllTrajectoriesOnOneGraph){
     drawEmptyPlot("All trajectories")
   }
-  for (cl in unique(trajectoriesDataset$class))
+  if (StudiedClass=='ALL') classList <- unique(trajectoriesDataset$class)
+  else classList <- StudiedClass
+  for (cl in classList)
   {
     if (!AllTrajectoriesOnOneGraph) drawEmptyPlot(paste("Trajectories of", cl))
     for (tId in unique(trajectoriesDataset[class == cl, trackId])) {
