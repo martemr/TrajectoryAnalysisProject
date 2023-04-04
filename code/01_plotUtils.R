@@ -54,18 +54,21 @@ drawVector <- function(x,y,angle,size=10, col='blue'){
 #==========================================
 # Tracé des trajectoires
 #==========================================
-drawTrajectories <- function(AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL'){
+drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL'){
+  initPlotImage(LocationId, dosinit)
+  subDataset <- trajectoriesDataset[recordingId %in% (recordingMeta[locationId==LocationId, recordingId]),]
   if(AllTrajectoriesOnOneGraph){
-    drawEmptyPlot("All trajectories")
+    drawEmptyPlot("Trajectoires")
   }
-  if (StudiedClass=='ALL') classList <- unique(trajectoriesDataset$class)
+  if (StudiedClass=='ALL') classList <- unique(subDataset$class)
   else classList <- StudiedClass
   for (cl in classList)
   {
     if (!AllTrajectoriesOnOneGraph) drawEmptyPlot(paste("Trajectories of", cl))
-    for (tId in unique(trajectoriesDataset[class == cl, trackId])) {
-      lines(unlist(trajectoriesDataset[trackId == tId, xCenter]),
-            unlist(trajectoriesDataset[trackId == tId, yCenter]),
+    for (tId in unique(subDataset[class == cl, trackId])) {
+      
+      lines(unlist(subDataset[trackId == tId, xCenter]),
+            unlist(subDataset[trackId == tId, yCenter]),
             col = (switch(cl, 
                           'car'='red', 
                           'truck_bus'='yellow',
@@ -78,17 +81,18 @@ drawTrajectories <- function(AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL
 #==========================================
 # Tracé des clusters
 #==========================================
-drawClusters <- function(clusters, clusterMeta, clusterId='ALL', AllTrajectoriesOnOneGraph = TRUE, annotation=FALSE){
+drawClusters <- function(selectedClass='car', LocationId, clusters, clusterMeta, clusterId='ALL', AllTrajectoriesOnOneGraph = TRUE, annotation=FALSE){
   if(annotation) stop("Not implemented")
   
   # Selection du cluster à afficher
-  if (clusterId=='ALL') clusterIdList <- unique(clusters$clusterId)
-  else clusterIdList <- clusterId
+  clusterIdList <- unique(clusters$clusterId)
+  #if (clusterId=='ALL') clusterIdList <- unique(clusters$clusterId)
+  #else clusterIdList <- clusterId
   
   if(AllTrajectoriesOnOneGraph) drawEmptyPlot("Clusters")
   
   for (cId in clusterIdList){
-    idList = unlist(clusters[clusterId==cId,'trackId'])
+    idList = unlist(clusters[locationId==LocationId & class==selectedClass & clusterId==cId, trackId])
     if(!AllTrajectoriesOnOneGraph) drawEmptyPlot(paste("Cluster", cId))
     color=clusterMeta[clusterId==cId, color]
     for (id in unlist(idList)) {
@@ -98,3 +102,41 @@ drawClusters <- function(clusters, clusterMeta, clusterId='ALL', AllTrajectories
     }
   }
 }
+
+#==========================================
+# Graphe en camembert
+#==========================================
+drawPieChart <- function(LocId){
+  recordingList = recordingMeta[locationId==LocId, recordingId]
+  totalTime = unlist(sum(recordingMeta[locationId==LocId,'duration']))/60
+  car        = paste(round((n_distinct(trajectoriesDataset[recordingId %in% recordingList & class %in% c('car','truck_bus'), 'trackId'])/ totalTime), 0), 'usagers/heure')
+  pedestrian = paste(round((n_distinct(trajectoriesDataset[recordingId %in% recordingList & class == 'pedestrian'          , 'trackId'])/ totalTime), 0), 'usagers/heure')
+  bicycle    = paste(round((n_distinct(trajectoriesDataset[recordingId %in% recordingList & class == 'bicycle'             , 'trackId'])/ totalTime), 0), 'usagers/heure')
+  
+  pie(c(n_distinct(trajectoriesDataset[recordingId %in% recordingList & class %in% c('car','truck_bus'), 'trackId']),
+        n_distinct(trajectoriesDataset[recordingId %in% recordingList & class == 'pedestrian'          , 'trackId']),
+        n_distinct(trajectoriesDataset[recordingId %in% recordingList & class == 'bicycle'             , 'trackId'])), 
+      labels = c(paste("Véhicules :", car), 
+                 paste("Piétons :"  , pedestrian),
+                 paste("Cyclistes :", bicycle)), 
+      col=c("#CA0020", "#4DAC26", "#0571B0"))
+}
+
+
+#==========================================
+# Tracé de la circulation sur la chaussée
+#==========================================
+convertColor <- function(c){
+  if(c) 'red'
+  else 'green'
+}
+
+drawOnRoad <- function(trajectoriesDataset, studiedClass){
+  drawEmptyPlot("Traversées de chausée")
+  for (tId in unique(trajectoriesDataset[class==studiedClass, trackId])){
+    col <- sapply(trajectoriesDataset[trackId==tId,isOnRoad], convertColor)
+    points(trajectoriesDataset[trackId == tId,.(xCenter,yCenter)], col=col, cex=0.5, pch=19)
+  }
+}
+
+

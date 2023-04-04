@@ -3,23 +3,8 @@
 # CEREMA
 # Author : Martin Emery
 # Date : February 2023, 23th
-# Description : 
+# Description : Diagramme de flux sur la carte
 ##---------------------------------------------
-
-#==========================================
-# Prerequisite
-#==========================================
-# Run 00_init
-# Run a clustering method
-
-#==========================================
-# Parametres
-#==========================================
-if(!exists("indMaxAnnotation")) indMaxAnnotation = 0.50
-if(!exists("clusters")) stop("Faire tourner une méthode de clustering d'abord")
-if(!exists("detailledMovesDiagram")) detailledMovesDiagram <- TRUE
-if(!exists("WithAnnotations")) WithAnnotations <- TRUE
-
 
 #==========================================
 # Librairies
@@ -52,26 +37,3 @@ flowDiagram <- function(clusterMeta, indMaxAnnotation=0, WithAnnotations=TRUE, a
     apply(clusterMeta,1, function(x) plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4]), drawBackground = TRUE, addAnnotation=WithAnnotations))
   }
 }
-
-
-
-#==========================================
-# Tracé des courbes : Un graphe par cluster
-#==========================================
-# if(detailledMovesDiagram){
-#   # Tracé des clusters
-#   apply(clusterMeta, 1, function(x) {
-#     drawEmptyPlot(paste("Trajectoire", x[1]))
-#     plotCluster(unlist(x[1]), unlist(x[2]), unlist(x[3]), unlist(x[4]))
-#     addAnnotations(clusterMeta = (
-#       data.table(
-#         clusterId = as.numeric(x[1]),
-#         size = as.numeric(x[2]),
-#         representativeId = as.numeric(x[3]),
-#         color = x[4]
-#       )
-#     ),
-#     indMaxAnnotation,
-#     Type = "veh/h")
-#   })
-# }
