@@ -3,38 +3,14 @@
 # CEREMA
 # Author : Martin Emery
 # Date : February 2023, 20th
-# Description : Initialisation des données
+# Description : Création de fonctions pour otimiser le tracé
 ##---------------------------------------------
-
-#==========================================
-# Parametres
-#==========================================
-
 
 #==========================================
 # Librairies
 #==========================================
 library(dplyr)
 library(png)
-
-#==========================================
-# Functions
-#==========================================
-addArrow <- function(tId, color='black', weigth=4/30){
-  x = unlist(trajectoriesDataset[trackId == tId, "xCenter"])
-  y = unlist(trajectoriesDataset[trackId == tId, "yCenter"])
-  arrows(
-    x0 = tail(x, n = 2)[1],
-    x1 = tail(x, n = 2)[2],
-    y0 = tail(y, n = 2)[1],
-    y1 = tail(y, n = 2)[2],
-    length = 0.2,
-    lwd = weigth*30,
-    col = color
-  )
-}
-
-euclidean <- function(a, b) sqrt(sum((a - b)^2))
 
 #==========================================
 # Find best positions to add annotations and add them

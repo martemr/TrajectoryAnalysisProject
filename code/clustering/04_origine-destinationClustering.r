@@ -24,26 +24,38 @@ library(factoextra)
 #==========================================
 chooseRepresentativeId <- function(idList, method){
   if (method=='max'){
-    tId = unlist(idList[idList$distanceTraveled == max(idList$distanceTraveled) & (idList$class == "car"), 'trackId'])
+    tId = unlist(idList[idList$distance == max(idList$distance) & (idList$class == "car"), 'trackId'])
   } else if (method=='random'){
     tId=sample(idList$trackId,1)
   } else if (method=='mean_interpolation'){
     stop("Method not implemented yet")
   } else if (method=='mean_distance'){
-    tId=idList[which.min(abs(idList$distanceTraveled-mean(idList$distanceTraveled))), trackId]
+    tId=idList[which.min(abs(idList$distance-mean(idList$distance))), trackId]
   }
 }
 
 #==========================================
 # Clustering par origine et destinations
 #==========================================
-createClusters <- function(tracksMeta, minSizecluster=4, ClusteringClass='car'){
-  clusterDataset <- trajectoriesDataset[class==ClusteringClass,] #recordingId %in% recordingIdToSelect & 
+createAllClustersOfLocalisation <- function(LocationId, tracksMeta){
+  clusters <<- data.table(trackId=tracksMeta$trackId, locationId=tracksMeta$locationId, class=tracksMeta$class)   # INITIAL 
+  
+  for (cl in unique(clusters$class)) clusters <<- createClusters(LocationId, cl, clusters)
+  
+  #tracksMetaBis <<- tracksMeta[clusters[,.(trackId,clusterId)], on=('trackId'), all.x=TRUE]
+  # tracksMetaBis <- merge(tracksMeta, clusters, by=('trackId'), all.x=TRUE)
+  # tracksMeta <<- tracksMetaBis
+  clusterMeta <<- getClusterMeta(tracksMeta, clusters)
+  
+}
+
+createClusters <- function(LocId, ClusteringClass="car", clusters, minSizecluster=4, eps=0.20){
+  clusterDataset <- trajectoriesDataset[trackId %in% clusters[locationId==LocId & class==ClusteringClass, trackId],]
   
   # Origine
   tracksMetaCluster <- tracksMeta[clusterDataset[trackLifetime<5,.(origineHeading=mean(heading)),by = "trackId"]
-    , on='trackId'
-    , nomatch=0]
+                                  , on='trackId'
+                                  , nomatch=0]
   
   # Destination
   tracksMetaCluster <- tracksMetaCluster[
@@ -52,17 +64,12 @@ createClusters <- function(tracksMeta, minSizecluster=4, ClusteringClass='car'){
     nomatch=0]
   
   # Clustering
-  clusteringResult <- dbscan::dbscan(scale(tracksMetaCluster[,.(origineHeading,destinationHeading)]), eps = 0.20, minPts =  1)
+  clusteringResult <- dbscan::dbscan(scale(tracksMetaCluster[,.(origineHeading,destinationHeading)]), eps = 0.20, minPts = minSizecluster)
   #fviz_cluster(clusteringResult, data = scale(tracksMetaCluster[,.(origineHeading,destinationHeading)])) # Affichage des clusters
   
   # Récupération des clusters
-  clusters <- data.table('trackId'=tracksMetaCluster$trackId, 'clusterId'=clusteringResult$cluster)
-  
-  # On ne garde que les clusters avec plus de 4 courbes
-  clusters <- clusters[clusterId %in% clusters[,.(number=.N),by="clusterId"][number>minSizecluster,clusterId]]
-  clusters <- data.table(clusterId=match(clusters$clusterId, unique(clusters$clusterId)), trackId=clusters$trackId) # Replace clusters values by 1 -> max values
-  #print(paste("Il y a", n_distinct(clusters$clusterId), "trajectoires différentes"))
-  #clusterDataset <- clusterDataset[clusters, on=.(trackId)]
+  clusters <- clusters[trackId %in% trajectoriesDataset$trackId,]# Permet d'enlever les trajectoires non souhaités
+  clusters[locationId==LocId & class==ClusteringClass, 'clusterId'] <- clusteringResult$cluster+1
   clusters
 }
 
@@ -70,17 +77,33 @@ createClusters <- function(tracksMeta, minSizecluster=4, ClusteringClass='car'){
 #==========================================
 # Ajout des métadonnées des clusters
 #==========================================
-getClusterMeta <- function(tracksMeta, clusters, LocId){
-  clusterMeta <- data.table(clusterId=numeric(), size=numeric(),representativeId=numeric(), color=character())
-  colors=rainbow(n_distinct(clusters$clusterId))
-  for (cId in unique(clusters$clusterId)) {
-    size = length(unlist(clusters[clusterId == cId, 'trackId']))
-    color = colors[cId]
-    idList = tracksMeta[trackId %in% unlist(clusters[clusterId == cId, 'trackId']), .(trackId,distanceTraveled,class)]
-    tId = chooseRepresentativeId(idList, "mean_distance")
-    clusterMeta <- rbind(clusterMeta, list(cId,size,tId,color))
+getClusterMeta <- function(tracksMeta, clusters){
+  clusterMeta <- data.table(locationId=numeric(), class=character(), clusterId=numeric(), size=numeric(),representativeId=numeric(), color=character())
+  for (cl in c("car", "truck_bus", "pedestrian", "bicycle")) {
+    for (LocId in unique(clusters[, locationId])) {
+      colors = rainbow(n_distinct(clusters$clusterId))
+      for (cId in unique(clusters[class == cl &
+                                  locationId == LocId, clusterId])) {
+        size = length(unlist(clusters[class == cl &
+                                        locationId == LocId & clusterId == cId, 'trackId']))
+        color = colors[cId]
+        idList = tracksMeta[trackId %in% unlist(clusters[class == cl &
+                                                           locationId == LocId &
+                                                           clusterId == cId, 'trackId']), .(trackId, distance, class)]
+        tId = chooseRepresentativeId(idList, "mean_distance")
+        
+        clusterMeta <-
+          rbind(clusterMeta, list(LocId, cl, cId, size, tId, color), fill = TRUE)
+      }
+      #if(sum(unique(tracksMeta[trackId %in% clusters$trackId, class])=='pedestrian')) type="ped/h" else type="veh/h"
+      type = "veh/h"
+      clusterMeta[, 'annotation(veh/h)'] <-
+        paste(round(clusterMeta$size / (unlist(
+          sum(recordingMeta[locationId == LocId, 'duration'])
+        ) / 60), 0), type, sep = "")
+      
+    }
   }
-  if(unique(tracksMeta[trackId %in% clusters$trackId, class])=='pedestrian') type="ped/h" else type="veh/h"
-  clusterMeta[,'annotation(veh/h)'] <- paste(round(clusterMeta$size/(unlist(sum(recordingMeta[locationId == LocId,'duration']))/60), 0),type, sep = "")
+  
   clusterMeta
 }
