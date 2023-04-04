@@ -12,31 +12,33 @@
 library(dplyr)
 library(png)
 library(data.table)
+library(concaveman)
+library(sp)
 
 #==========================================
-# Functions
+# Calcul de distance
 #==========================================
-# Calcul de la distance parcourue par le véhicule (Exprimée en m)
-# calculateDistance <- function(lx, ly) {
-#   dx <- diff(lx)
-#   dy <- diff(ly)
-#   dist <- sqrt(dx ^ 2 + dy ^ 2)
-#   return(sum(dist))
-# }
 euclidean <- function(a, b) sqrt(sum((a - b)^2))
-
+sum_distance <- function(x, y) {
+  n <- length(x)
+  total_distance <- 0
+  for (i in 1:(n-1)) {
+    distance <- sqrt((x[i+1] - x[i])^2 + (y[i+1] - y[i])^2)
+    total_distance <- total_distance + distance
+  }
+  return(total_distance)
+}
 
 #==========================================
 # Chargement des Données
 #==========================================
-loadData <- function(dosinit, LocationId){
-  print(paste("Chargement des données de la localisation :", LocationId))
+loadData <- function(dosinit){
+  print(paste("Chargement des données"))
   # Charge toutes les Metadonnées des recordings
   recordingMeta <- data.table()
   for (i in 0:32) {
     recordingMetaName <- sprintf("%s%02d_recordingMeta.csv", dosinit, i)
-    recordingMeta <- rbindlist(list(recordingMeta, 
-                                    fread(recordingMetaName, header = TRUE, sep = ",")))
+    recordingMeta <- rbindlist(list(recordingMeta, fread(recordingMetaName, header = TRUE, sep = ",")))
   }
   
   # Calcule la durée de chacune en minute
@@ -45,25 +47,49 @@ loadData <- function(dosinit, LocationId){
   # Lecture des tracks
   tracks <- data.table()
   tracksMeta <- data.table()
-  for (i in unlist(recordingMeta[locationId==LocationId, recordingId])){
+  for (i in unlist(recordingMeta[, recordingId])){
     tracks <- rbindlist(list(tracks, 
                              fread(sprintf("%s%02d_tracks.csv",    dosinit, i), header = TRUE, sep = ',')))
     tracksMeta <- rbindlist(list(tracksMeta, 
                                  fread(sprintf("%s%02d_tracksMeta.csv",dosinit, i), header = TRUE, sep = ',')))
   }
   
-  # Décalage des tracksId
+  # Décalage des tracksId par recording ID
   tracks[, trackId := trackId + recordingId*100000]
   tracksMeta[, trackId := trackId + recordingId*100000]
   
   # Ajout de la distance parcourue dans les métadonnées
-  tracksMeta <- tracks[, .(distanceTraveled = euclidean(xCenter, yCenter)), by = trackId][tracksMeta, on = "trackId"]
+  distance <- tracks[, .(distance = sum_distance(unlist(.SD[, xCenter]), unlist(.SD[, yCenter]))), by = trackId]
+  tracksMeta <- merge(tracksMeta, distance, by = "trackId")
   
+  # Ajout de la localisation partout
+  tracksMeta <- tracksMeta[recordingMeta[,.(recordingId,locationId)], on=('recordingId'), nomatch = NULL]
+  tracks <- tracks[tracksMeta[,.(trackId,locationId)], on=('trackId'), nomatch = NULL]
+
+  # Définition des variables globales
   tracks <<- tracks
   tracksMeta <<- tracksMeta
   recordingMeta <<- recordingMeta
   print("Chargement des données terminé")
 }
+
+
+#==========================================
+# Détermination de la voie (chaussée)
+#==========================================
+findRoad <- function(toPlot = FALSE, trajectoriesDataset, LocId){
+  x = unlist(trajectoriesDataset[class %in% c('car','truck_bus') & recordingId %in% recordingMeta[locationId==LocId, recordingId],'xCenter'])
+  y = unlist(trajectoriesDataset[class %in% c('car','truck_bus') & recordingId %in% recordingMeta[locationId==LocId, recordingId],'yCenter'])
+  
+  # Compute the convex hull polygon
+  roadArea <- concaveman(cbind(x, y))
+  if(toPlot){
+    drawEmptyPlot("")
+    lines(roadArea,col='red', lwd=2)
+  }
+  roadArea
+}
+
 
 #==========================================
 # Nettoyage du dataset 
@@ -71,38 +97,41 @@ loadData <- function(dosinit, LocationId){
 cleanDataset <- function(distanceMin=20){
   print("Nettoyage des données")
   # Selection par distance minimale parcourue
-  trajectoriesDataset <- tracks[trackId %in% unlist(tracksMeta[tracksMeta$distanceTraveled > distanceMin, 'trackId']),]
-  # Ajout de la classe de l'objet
-  trajectoriesDataset <- tracksMeta[,.(trackId,class), by=trackId][trajectoriesDataset, on='trackId']
+  trajectoriesDataset <- tracks #[trackId %in% unlist(tracksMeta[tracksMeta$distanceTraveled > distanceMin, 'trackId']),]
 
   # Selection des trajectoires entières
   # On ne garde pas les trajectoires qui ne sont potentiellement pas entières : éléments présents sur les 5 premières et 5 dernières frame
-  maxs <- aggregate(frame ~ recordingId, data = trajectoriesDataset, max)
-  #recordingMeta <- cbind(recordingMeta, 'lastFrame'=maxs)
-  maxs <- rbind(maxs,
-                list(maxs$recordingId, maxs$frame-1),
-                list(maxs$recordingId, maxs$frame-2),
-                list(maxs$recordingId, maxs$frame-3),
-                list(maxs$recordingId, maxs$frame-4),
-                data.table('recordingId'=unique(maxs$recordingId), 'frame'=0),
-                data.table('recordingId'=unique(maxs$recordingId), 'frame'=1),
-                data.table('recordingId'=unique(maxs$recordingId), 'frame'=2),
-                data.table('recordingId'=unique(maxs$recordingId), 'frame'=3),
-                data.table('recordingId'=unique(maxs$recordingId), 'frame'=4))
+  maxs <- setDT(aggregate(frame ~ recordingId, data = trajectoriesDataset, max))[,frame := frame-5]
+
+  toRemove <- tracksMeta[maxs, on=.(recordingId,finalFrame>=frame)][,.(recordingId,trackId)]
+  toRemove <- rbind(toRemove, tracksMeta[initialFrame<5, .(recordingId, trackId)])
   
-  tracksToRemove <- subset(trajectoriesDataset, recordingId %in% maxs$recordingId & frame %in% maxs$frame)[,'trackId'] %>% unique
-  trajectoriesDataset <- trajectoriesDataset[!(trajectoriesDataset$'trackId' %in% (tracksToRemove$trackId)),]
-  rm(maxs, tracksToRemove)
+  trajectoriesDataset <- trajectoriesDataset[!unlist(trajectoriesDataset[,.(recordingId %in% toRemove$recordingId & trackId %in% toRemove$trackId)])]
+  #################### >
   
+  #trajectoriesDataset <- trajectoriesDataset[!(trajectoriesDataset$'trackId' %in% (tracksToRemove$trackId)),]]
+
   # Simplification des données (25fps -> 5fps)
-  trajectoriesDataset <- trajectoriesDataset[, group := trunc(trackLifetime / 5)]
   trajectoriesDataset <- trajectoriesDataset[, group := trunc(frame / 5)]
   trajectoriesDataset <- trajectoriesDataset[, lapply(.SD, mean), by = .(trackId, group), .SDcols = is.numeric]
-  trajectoriesDataset <- inner_join(trajectoriesDataset[,3:ncol(trajectoriesDataset)], tracksMeta[,c('trackId','class')], by='trackId')
+
+  # Ajout de la classe de l'objet
+  trajectoriesDataset <- trajectoriesDataset[tracksMeta[,.(trackId,class)], on=('trackId'), nomatch = NULL]
+
+  # Ajout de l'information "sur la route"
+  for(LocalisationId in unique(recordingMeta$locationId)){
+    roadArea = findRoad(trajectoriesDataset=trajectoriesDataset, LocId = LocalisationId)
+    trajectoriesDataset[, isOnRoad := as.logical(point.in.polygon(xCenter, yCenter, roadArea[, 1], roadArea[, 2]))]
+  }
+  
+  # Ajout de la localisation partout
+  trajectoriesDataset <- trajectoriesDataset[tracksMeta[,.(trackId,class)], on=('trackId'), nomatch = NULL]
+  trajectoriesDataset <- trajectoriesDataset[tracksMeta[,.(trackId,class)], on=('trackId'), nomatch = NULL]
   
   print("Données nettoyés")
+  
   # Retourne le dataset nettoyé
-  trajectoriesDataset
+  trajectoriesDataset <<- trajectoriesDataset
 }
 
 #print(paste("Pré-traitement :", n_distinct(tracks[!(trackId %in% unique(trajectoriesDataset$trackId)),trackId]), "trajectoires ont été retirés sur",  n_distinct(tracks$trackId)))
