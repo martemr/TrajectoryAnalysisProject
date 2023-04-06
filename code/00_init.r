@@ -97,7 +97,7 @@ findRoad <- function(toPlot = FALSE, trajectoriesDataset, LocId){
 cleanDataset <- function(distanceMin=20){
   print("Nettoyage des données")
   # Selection par distance minimale parcourue
-  trajectoriesDataset <- tracks #[trackId %in% unlist(tracksMeta[tracksMeta$distanceTraveled > distanceMin, 'trackId']),]
+  trajectoriesDataset <- tracks[trackId %in% unlist(tracksMeta[tracksMeta$distance > distanceMin, 'trackId']),]
 
   # Selection des trajectoires entières
   # On ne garde pas les trajectoires qui ne sont potentiellement pas entières : éléments présents sur les 5 premières et 5 dernières frame
@@ -121,7 +121,7 @@ cleanDataset <- function(distanceMin=20){
   # Ajout de l'information "sur la route"
   for(LocalisationId in unique(recordingMeta$locationId)){
     roadArea = findRoad(trajectoriesDataset=trajectoriesDataset, LocId = LocalisationId)
-    trajectoriesDataset[, isOnRoad := as.logical(point.in.polygon(xCenter, yCenter, roadArea[, 1], roadArea[, 2]))]
+    trajectoriesDataset[locationId==LocalisationId, isOnRoad := as.logical(point.in.polygon(xCenter, yCenter, roadArea[, 1], roadArea[, 2]))]
   }
   
   # Ajout de la localisation partout
@@ -133,5 +133,8 @@ cleanDataset <- function(distanceMin=20){
   # Retourne le dataset nettoyé
   trajectoriesDataset <<- trajectoriesDataset
 }
+# 
+# clusteringResult <- dbscan::dbscan(scale(trajectoriesDataset[class %in% c('car','truck_bus') & locationId==1,.(xCenter, yCenter)]), eps = 0.20, minPts =2)
+# fviz_cluster(clusteringResult, data =scale(trajectoriesDataset[class %in% c('car','truck_bus') &locationId==1,.(xCenter, yCenter)])) # Affichage des clusters
 
 #print(paste("Pré-traitement :", n_distinct(tracks[!(trackId %in% unique(trajectoriesDataset$trackId)),trackId]), "trajectoires ont été retirés sur",  n_distinct(tracks$trackId)))

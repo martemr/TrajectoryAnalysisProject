@@ -44,7 +44,6 @@ generalPage <- function(input,output){
       # Zone d'étude
       conditionalPanel(
         "input.dataToPrintGeneral.includes('2')",
-        print("here"),
         align = "center",
         plotOutput("zoneEtude", height = "auto")
       ),

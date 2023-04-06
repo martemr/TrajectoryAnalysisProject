@@ -3,7 +3,7 @@ library(shinycssloaders)
 #library(ggplot2)
 source("./ui/welcomePage.R")
 source("./ui/generalPage.R")
-source("./ui/etudeDetaillePage.R")
+source("./ui/detailledStudyPage.R")
 source("./server/loadingAll.R")
 source("./server/detailledStudyServer.R")
 source("./server/generalServer.R")
@@ -15,14 +15,15 @@ ui <-
     "Sécurité routière d'un carrefour",
     welcomePage(),
     generalPage(input, output),
-    etudeDetaille(input,output)
+    detailledStudy(input,output)
   )
 
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
-  if(!exists("initDone")) loadAll(input,output)
+  #if(!exists("initDone")) 
+  loadAll(input,output)
 
-  generalManagement(input,output)
+  generalServer(input,output)
 
   detailledStudyServer(input,output)
 }

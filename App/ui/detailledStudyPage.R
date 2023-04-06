@@ -1,4 +1,4 @@
-etudeDetaille <- function(input, output){
+detailledStudy <- function(input, output){
   tabPanel("Etude détaillée",
     # CONDITIONS
     sidebarPanel(
@@ -37,7 +37,6 @@ etudeDetaille <- function(input, output){
             "Zone d'attente" = 6,
             "Inclure annotations" = 7
           ),
-          selected = 1
         ),
       ),
   
@@ -73,6 +72,17 @@ etudeDetaille <- function(input, output){
       conditionalPanel("input.studyType.includes('3')",
                        h3("Parametres d'étude"),
                        
+                       textInput("trackIdInterraction",
+                                 label = h4("track à étudier"),
+                                 value = 700000
+                       ),
+                       # ch <- list(trajectoriesDataset[,'trackId']),
+                       # names(ch)<-ch,
+                       # selectInput("trackIdInterraction",label="",
+                       #             choices = ch
+                       # )
+                       
+                       
       )
     ),
   
@@ -96,20 +106,19 @@ etudeDetaille <- function(input, output){
       #  Flux
       conditionalPanel(
         "input.classParams.includes('3') & input.studyType.includes('1')",
-        withSpinner(plotOutput("flowDiagram", height =
-                                 800), type = 1)
+        withSpinner(plotOutput("flowDiagram", height =800), type = 1)
       ),
       
       #  Circulations sur la chausée
       conditionalPanel(
         "input.classParams.includes('4') & input.studyType.includes('1')",
-        plotOutput("onRoadPlot", height=800)
+        withSpinner(plotOutput("onRoadPlot", height=800), type=1)
       ), 
       
       #  Vitesse
       conditionalPanel(
         "input.classParams.includes('5') & input.studyType.includes('1')",
-        plotOutput("speedHeatMap", height=800)
+        withSpinner(plotOutput("speedHeatMap", height=800), type=1)
       ),
       
       #  Zone d'attente
@@ -140,7 +149,12 @@ etudeDetaille <- function(input, output){
       
       
       
-  
+      # INTERRACTION
+      #  sk
+      conditionalPanel(
+        "input.studyType.includes('3')",
+        plotOutput("interractionPlot", height = "auto")
+      ),
 
   
       

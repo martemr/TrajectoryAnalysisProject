@@ -36,7 +36,7 @@ detailledStudyServer <- function(input, output){
     print("Chargement ")
     LocId <- input$LocalisationId
     class <-input$classId
-    #drawOnRoad(trajectoriesDataset, class=class)
+    drawOnRoad(trajectoriesDataset, studiedClass=class, LocId)
     print(" → done")
   }, cacheKeyExpr = {list(input$classId, input$LocalisationId)})
   
@@ -54,7 +54,7 @@ detailledStudyServer <- function(input, output){
     LocId <- input$LocalisationId
     totalTime = unlist(sum(recordingMeta[locationId==LocId,'duration']))/60
     cl <- input$countClass
-    print(cl)
+    #print(cl)
     data.table("Type"=c(cl, "Total"),
                "Comptage" = c(lapply(cl, function(x) paste(round((n_distinct(trajectoriesDataset[locationId==LocId & class == x, 'trackId'])/ totalTime), 0), 'usagers/heure')),
                                      paste(round((n_distinct(trajectoriesDataset[locationId==LocId,trackId])/totalTime),0),'usagers/heure')))
@@ -73,13 +73,16 @@ detailledStudyServer <- function(input, output){
 
   
   
+  # INTERRACTIONS
+  #  Tableau des comptages
   
   
   
-  # output$interractionPlot <- renderPlot(
-  #   tId <- input$trackIdSelected
-  #   plotInterraction(tId)
-  # )
+  output$interractionPlot <- renderPlot({
+    #drawEmptyPlot("")
+    # tId <- input$trackIdInterraction
+    # plotTrackInterractions(tId, 7)# trajectoriesDataset[trackId==tId, recordingId])
+  })
   
 }
   

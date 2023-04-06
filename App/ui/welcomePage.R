@@ -1,6 +1,6 @@
 welcomePage <- function(){
   tabPanel(
-    "Acceuil",
+    "Accueil",
     fluidRow(
       textOutput("results"),
       img(src = 'logoCerema.png', align = "center")
@@ -23,11 +23,11 @@ welcomePage <- function(){
     ),
     fluidRow(
       align = 'center',
-      h3("Données d'étude"),
-      withSpinner(textOutput("waitingText"), type = 1)
+      h4("Données d'étude"),
+      textOutput("waitingText")
     ),
     fluidRow(align = 'center',
              img(src = 'plaquette.png', align = "center"),),
-    fluidRow(align = 'center', withSpinner(textOutput("null"), type = 1)),
+    fluidRow(align = 'center', withSpinner(textOutput("clustersLoad"), type = 1)),
   )
 }

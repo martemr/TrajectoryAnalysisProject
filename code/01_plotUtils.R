@@ -126,15 +126,21 @@ drawPieChart <- function(LocId){
 #==========================================
 # Tracé de la circulation sur la chaussée
 #==========================================
-convertColor <- function(c){
-  if(c) 'red'
-  else 'green'
+convertColor <- function(c, class){
+  if (class=='pedestrian'){ # A pedestrian should not be on road
+    if(c) 'red'
+    else 'green'
+  } else {
+    if(c) 'green'
+    else 'red'
+  } 
 }
 
-drawOnRoad <- function(trajectoriesDataset, studiedClass){
+drawOnRoad <- function(trajectoriesDataset, studiedClass, LocId){
   drawEmptyPlot("Traversées de chausée")
-  for (tId in unique(trajectoriesDataset[class==studiedClass, trackId])){
-    col <- sapply(trajectoriesDataset[trackId==tId,isOnRoad], convertColor)
+  for (tId in unique(trajectoriesDataset[locationId==LocId & class==studiedClass, trackId])){
+    #print(tId)
+    col <- sapply(trajectoriesDataset[trackId==tId,isOnRoad], function(x) convertColor(x, studiedClass))
     points(trajectoriesDataset[trackId == tId,.(xCenter,yCenter)], col=col, cex=0.5, pch=19)
   }
 }

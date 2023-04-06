@@ -38,7 +38,7 @@ chooseRepresentativeId <- function(idList, method){
 # Clustering par origine et destinations
 #==========================================
 createAllClustersOfLocalisation <- function(LocationId, tracksMeta){
-  clusters <<- data.table(trackId=tracksMeta$trackId, locationId=tracksMeta$locationId, class=tracksMeta$class)   # INITIAL 
+  if(!exists("clusters")) clusters <<- data.table(trackId=tracksMeta$trackId, locationId=tracksMeta$locationId, class=tracksMeta$class)   # INITIAL 
   
   for (cl in unique(clusters$class)) clusters <<- createClusters(LocationId, cl, clusters)
   
