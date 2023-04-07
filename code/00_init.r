@@ -90,6 +90,19 @@ findRoad <- function(toPlot = FALSE, trajectoriesDataset, LocId){
   roadArea
 }
 
+#==========================================
+# Fonction de simplification des données
+#==========================================
+simplifyDataset <- function(dataset, fps=5){
+  setDT(dataset)
+  clonedDataset <- dataset[, group:= trunc(frame /(25/fps))]
+  #startTime <- Sys.time()
+  simplified <- clonedDataset[, lapply(.SD, mean), by = .(trackId, group)]
+  #endTime <- Sys.time()
+  #runtime = endTime-startTime
+  #list(runtime, clonedDataset)
+  simplified
+  }
 
 #==========================================
 # Nettoyage du dataset 
@@ -112,8 +125,7 @@ cleanDataset <- function(distanceMin=20){
   #trajectoriesDataset <- trajectoriesDataset[!(trajectoriesDataset$'trackId' %in% (tracksToRemove$trackId)),]]
 
   # Simplification des données (25fps -> 5fps)
-  trajectoriesDataset <- trajectoriesDataset[, group := trunc(frame / 5)]
-  trajectoriesDataset <- trajectoriesDataset[, lapply(.SD, mean), by = .(trackId, group), .SDcols = is.numeric]
+  trajectoriesDataset <- simplifyDataset(trajectoriesDataset, fps=5)
 
   # Ajout de la classe de l'objet
   trajectoriesDataset <- trajectoriesDataset[tracksMeta[,.(trackId,class)], on=('trackId'), nomatch = NULL]
@@ -125,9 +137,8 @@ cleanDataset <- function(distanceMin=20){
   }
   
   # Ajout de la localisation partout
-  trajectoriesDataset <- trajectoriesDataset[tracksMeta[,.(trackId,class)], on=('trackId'), nomatch = NULL]
-  trajectoriesDataset <- trajectoriesDataset[tracksMeta[,.(trackId,class)], on=('trackId'), nomatch = NULL]
-  
+  #trajectoriesDataset <- trajectoriesDataset[tracksMeta[,.(trackId,class)], on=('trackId'), nomatch = NULL]
+
   print("Données nettoyés")
   
   # Retourne le dataset nettoyé
