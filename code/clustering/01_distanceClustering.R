@@ -9,7 +9,7 @@
 #==========================================
 # 
 #==========================================
-createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=3, plot=FALSE, maxDistance=150, distanceTreshold = 10){
+createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=3, plot=FALSE, maxDistance=1000, distanceTreshold = 10){
   print("Creating clusters")
   startTime <- Sys.time()
   
@@ -53,7 +53,8 @@ createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=
     # Add the interpolated values to the interpolationMatrix
     interpolationMatrix[i, ] <- paddedInterpolation$y
   }
-  
+    interpolationMatrix <<- interpolationMatrix
+
   interpolationMatrix[is.na(interpolationMatrix)] <- maxDistance
   
   distance="euclidian"
@@ -62,6 +63,7 @@ createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=
                                              distance)))
   setorder(mat, dist)
   mat <- as.data.table(mat[!(is.na(dist)),])
+  mat <<- mat
   
   clustersTemp <- data.table(trackId = unlist(unique(c(mat$V1, mat$V2))), clusterId=numeric(), distance=numeric())
   clusterCnt <- 1
@@ -73,7 +75,13 @@ createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=
     if(!is.na(clustersTemp[trackId==Id1,clusterId])){
       if(!is.na(clustersTemp[trackId==Id2,clusterId])){
         # Tous les deux déja dans un cluster
-        next
+        # On unit les deux clusters
+        cl1 = clustersTemp[trackId==Id1,clusterId]
+        cl2 = clustersTemp[trackId==Id2,clusterId]
+        clustersTemp[clusterId %in% c(cl1,cl2), clusterId := clusterCnt]
+        #replace(clustersTemp, clustersTemp$clusterId %in% c(cl1,cl2), 10000)
+        clusterCnt <- clusterCnt+1
+        #next
       } else {
         # 1 seul dans un cluster 
         clustersTemp[trackId==Id2,c('clusterId', 'distance') := list(clustersTemp[trackId==Id1,clusterId], mat[row,dist])]
@@ -105,8 +113,8 @@ createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=
   clusterMeta$color <- rainbow(nrow(clusterMeta))
   
   endTime <- Sys.time()
-  print(paste("Clusters created in", endTime-startTime))
+  print(paste("Clusters created in", round(endTime-startTime, 2), "secondes"))
   
-  if (plot)  drawClusters(selectedClass = "pedestrian", 1, clusters = clustersTemp[clusterId %in% clusterMeta$clusterId] ,clusterMeta = clusterMeta, AllTrajectoriesOnOneGraph = FALSE)
+  if (plot)  drawClusters(selectedClass = "pedestrian", 1, clusters = clustersTemp[clusterId %in% clusterMeta$clusterId] ,clusterMeta = clusterMeta, AllTrajectoriesOnOneGraph = TRUE)
   list(clusterMeta = clusterMeta, clusterTemp = clustersTemp)
   }
