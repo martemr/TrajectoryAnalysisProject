@@ -51,6 +51,17 @@ drawVector <- function(x,y,angle,size=10, col='blue'){
          lwd = 2, col = col)
 }
 
+
+
+#==========================================
+# Tracé d'UNE trajectoire
+#==========================================
+drawTrajectory <- function(LocationId, tId, dosinit, type="l", col='black'){
+  initPlotImage(LocationId, dosinit)
+  drawEmptyPlot(paste("Trajectoire", tId))
+  points(tracks[trackId==tId, .(xCenter, yCenter)], type=type, col=col)
+}
+
 #==========================================
 # Tracé des trajectoires
 #==========================================
