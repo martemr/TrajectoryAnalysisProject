@@ -105,33 +105,3 @@ predictKalmanPlot <- function(time, tId, trainingSize){
   legend(1,1,legend=c("Original trajectory", "Trained part", "Predicted"), 
          col=c('black', 'red', 'green'), lty=1)
 }
-
-
-plot(data[1:200,.(xCenter,yCenter)])
-test = x_k1_k
-t2 = P_k1_k
-for (ind in seq(1,time)){
-  for (r in seq(1,25)){
-    test <- f %*% test
-    t2 <- f %*% t2 %*% t(f) + Q 
-  }
-  
-  
-  #par(mfrow=c(2,1))
-
-  points(pred[,.(x,y)], col='red')
-  rect(xleft = unlist(test[1]-t2[1,1]), xright = unlist(test[1]+t2[1,1]), 
-      ytop = unlist(test[2]+t2[2,2]),ybottom = unlist(test[2]-t2[2,2]),col=NA)
-  points(unlist(test[1]), unlist(test[2]),pch=19, col='green')
-  readline()
-}
-
-
-
-
-plot(data[1:200,.(xVelocity,yVelocity)])
-points(pred[,.(xSpeed,ySpeed)], col='red')
-
-
-
-
