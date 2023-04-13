@@ -4,7 +4,8 @@ library(matlib)
 defineKalman <- function(trackIdToPredict=8, sampleSize=10){
   # Récupération des données
   data = tracks[trackId==trackIdToPredict, .(frame,xCenter,xVelocity,yCenter,yVelocity, xAcceleration, yAcceleration)]
-  
+  trackClass = unique(tracksMeta[trackId==trackIdToPredict,class])
+
   # DEFINITION DES PARAMETRES
   # Taille de l'état
   n=6 
@@ -26,13 +27,13 @@ defineKalman <- function(trackIdToPredict=8, sampleSize=10){
   )
   
   # DEFINITIONS MATRICES
-  # Covariance initiale
-  P_k_k=rbind(c(0.56,   0,    0,    0,    0,    0),
-              c(   0,0.56,    0,    0,    0,    0),
-              c(   0,   0,10^-2,    0,    0,    0),
-              c(   0,   0,    0,10^-2,    0,    0), 
-              c(   0,   0,    0,    0,10^-3,    0),
-              c(   0,   0,    0,    0,    0,10^-3)
+  # Récupération des paramètres et définition de la covariance initiale
+  P_k_k=rbind(c(getVariancePercentile(trackClass,'xPosition',0.75,1),   0,    0,    0,    0,    0),
+              c(   0,getVariancePercentile(trackClass,'yPosition',0.75,1),    0,    0,    0,    0),
+              c(   0,   0,getVariancePercentile(trackClass,'xSpeed',0.75,2),    0,    0,    0),
+              c(   0,   0,    0,getVariancePercentile(trackClass,'ySpeed',0.75,2),    0,    0), 
+              c(   0,   0,    0,    0,getVariancePercentile(trackClass,'xAcc',0.75,3),    0),
+              c(   0,   0,    0,    0,    0,getVariancePercentile(trackClass,'yAcc',0.75,3))
   )
   # Bruit de modèle -> Faible car modèle fiable
   Q = I*10^-6
