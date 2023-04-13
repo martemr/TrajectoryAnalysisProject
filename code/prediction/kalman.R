@@ -36,7 +36,7 @@ defineKalman <- function(trackIdToPredict=8, sampleSize=10){
               c(   0,   0,    0,    0,    0,getVariancePercentile(trackClass,'yAcc',0.75,3))
   )
   # Bruit de modèle -> Faible car modèle fiable
-  Q = I*10^-6
+  Q = I*10^-2
   # Bruit de mesure -> Faible car mesure fiable
   R = I*10^-6
   
@@ -82,8 +82,27 @@ defineKalman <- function(trackIdToPredict=8, sampleSize=10){
   list("LastValue"=as.matrix(x_k_k), "LastCovariance"=as.matrix(P_k_k), "TransitionMatrix"=f, "ModelNoise"=Q)
 }
 
-# time is in s
-predictKalmanPlot <- function(time, tId, trainingSize){
+predictKalman <- function(timeToPredict, tId, trainingSize, uncertainty=TRUE){
+  resultKalman <- defineKalman(tId,trainingSize)
+  
+  predictedValue <- resultKalman$LastValue
+  predictedValueCovariance <- resultKalman$LastCovariance
+  
+  for (ind in seq(1,timeToPredict)){
+    for (r in seq(1,25)){
+      predictedValue <- resultKalman$TransitionMatrix %*% predictedValue
+      predictedValueCovariance <- resultKalman$TransitionMatrix %*% predictedValueCovariance %*% t(resultKalman$TransitionMatrix) + resultKalman$ModelNoise
+    }
+  }
+  
+  rownames(predictedValue) <- c('xCenter','yCenter','xVelocity','yVelocity','xAcceleration','yAcceleration')
+  colnames(predictedValue) <- paste('Time = ', timeToPredict,'s')
+  list(predictedValue, predictedValueCovariance)
+}
+  
+
+# timeToPredict is in s
+predictKalmanPlot <- function(timeToPredict=3, tId, trainingSize=10, uncertainty=TRUE){
   resultKalman <- defineKalman(tId,trainingSize)
   
   predictedValue <- resultKalman$LastValue
@@ -92,17 +111,25 @@ predictKalmanPlot <- function(time, tId, trainingSize){
   drawEmptyPlot("Predicted trajectory") 
   points(tracks[trackId==tId, .(xCenter,yCenter)], col='blue')
   points(tracks[trackId==tId & trackLifetime<trainingSize, .(xCenter,yCenter)], col='red')  
-  for (ind in seq(1,time)){
+  for (ind in seq(1,timeToPredict)){
     for (r in seq(1,25)){
       predictedValue <- resultKalman$TransitionMatrix %*% predictedValue
       predictedValueCovariance <- resultKalman$TransitionMatrix %*% predictedValueCovariance %*% t(resultKalman$TransitionMatrix) + resultKalman$ModelNoise
     }
 
     points(unlist(predictedValue[1]), unlist(predictedValue[2]),pch=19, col='green')
-    # rect(xleft = unlist(test[1]-t2[1,1]), xright = unlist(test[1]+t2[1,1]), 
-    #      ytop = unlist(test[2]+t2[2,2]),ybottom = unlist(test[2]-t2[2,2]),col=NA)
-    # 
+    
+    if(uncertainty){
+      rect(xleft = unlist(predictedValue[1]-predictedValueCovariance[1,1]), 
+           xright  = unlist(predictedValue[1]+predictedValueCovariance[1,1]), 
+           ytop  = unlist(predictedValue[2]+predictedValueCovariance[2,2]), 
+           ybottom = unlist(predictedValue[2]-predictedValueCovariance[2,2]),
+           col=NA)
+    }
+    
   }
   legend(1,1,legend=c("Original trajectory", "Trained part", "Predicted"), 
-         col=c('black', 'red', 'green'), lty=1)
+         col=c('blue', 'red', 'green'), lty=1, lwd=3)
+  
+  
 }
