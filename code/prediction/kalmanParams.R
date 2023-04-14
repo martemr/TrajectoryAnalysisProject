@@ -38,6 +38,6 @@ plotVarianceArray <- function(class='car'){
 }
 
 getVariancePercentile <- function(class='car', studiedVariable='xPosition', percentile=.90, digits=0){
-  computeVarianceArray(trajectoriesDataset)
+  variancesArray <- computeVarianceArray(trajectoriesDataset)
   quantile(unlist(round(variancesArray[class==class, ..studiedVariable],digits=digits)),probs = c(percentile))
 }
