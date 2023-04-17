@@ -67,7 +67,7 @@ drawTrajectory <- function(LocationId, tId, dosinit, type="l", col='black', newP
 #==========================================
 # Tracé des trajectoires
 #==========================================
-drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL'){
+drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL', legend=FALSE){
   initPlotImage(LocationId, dosinit)
   subDataset <- trajectoriesDataset[recordingId %in% (recordingMeta[locationId==LocationId, recordingId]),]
   if(AllTrajectoriesOnOneGraph){
@@ -89,6 +89,8 @@ drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TR
                           'bicycle'='green')))
     }
   }
+  legend(1,1, legend=c('Voitures','Bus','Piétons','Cyclistes'), 
+         col=c('red','yellow','blue', 'green'), lty=1, cex=0.8, lwd=2)
 }
 
 #==========================================
@@ -156,6 +158,8 @@ drawOnRoad <- function(trajectoriesDataset, studiedClass, LocId){
     col <- sapply(trajectoriesDataset[trackId==tId,isOnRoad], function(x) convertColor(x, studiedClass))
     points(trajectoriesDataset[trackId == tId,.(xCenter,yCenter)], col=col, cex=0.5, pch=19)
   }
+  legend(1,1, legend=c('Sur la chaussée','Sur le troitoir'), 
+         col=c(convertColor(TRUE),convertColor(FALSE)), lty=1, cex=0.8, lwd=2)
 }
 
 

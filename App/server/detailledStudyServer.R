@@ -1,8 +1,5 @@
 detailledStudyServer <- function(input, output){
   
-  
-  
-  
   # CLASSE
   #  Trajectoires
   output$classTrajectoire <- renderCachedPlot({

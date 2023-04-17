@@ -83,7 +83,59 @@ detailledStudy <- function(input, output){
                        # )
                        
                        
-      )
+      ),
+      
+      
+      # DESCRIPTION
+      conditionalPanel(
+        "input.studyType.includes('1')",
+        h3("Etude par classe"),
+        p("L'étude par classe est l'étude de l'intersection par type de véhicule. Le but est de visualiser en détail les déplacements des usagers et les éventuelles contraintes que cela peut entrainer."),
+        ),
+      
+      conditionalPanel(
+        "input.studyType.includes('2')",
+        h3("Etude par fréquentation"),
+        p("L'étude par fréquentation permet d'évaluer la taille du carrefour et ses fréquentations. On retrouve notamment le comptage des véhicules, l'utilisation de la chausée."),
+      ),
+      
+      conditionalPanel(
+        "input.studyType.includes('3')",
+        h3("Etude des interractions"),
+        p("Les interractions au sein d'un carrefour permettent de mieux comprendre les conflits et les conceptions à revoir."),
+      ),
+      
+      h3("Description"),
+      conditionalPanel(
+        "!(input.classParams.length>0)",
+        p('Veuillez selectionner une donnée à afficher.')
+      ),
+      
+      conditionalPanel(
+        "input.classParams.includes('1') & input.studyType.includes('1')",
+        h4("Trajectoires"),
+        p("La courbe qui s'affiche est le tracé des trajectoires de la classe sélectionné sur l'intersection précédemment sélectionnée. Toutes les trajectoires sont superposées et une ligne est une trajectoire.")
+      ),
+      
+      conditionalPanel(
+        "input.classParams.includes('2') & input.studyType.includes('1')",
+        h4("Groupes de trajectoires"),
+        p("Les trajectoires affichés sont groupés par couleur. Un groupe est un ensemble de trajectoire ayant des caractéristiques communes : même origine et destination, tracé très similaire, etc.")
+      ),
+      
+      conditionalPanel(
+        "input.classParams.includes('3') & input.studyType.includes('1')",
+        h4("Flux"),
+        p("Le tracé des flux regroupe les trajectoires principales en une trajectoire plus visible. La taille des trajectoires est proportionnelle au volume de véhicule par heure. La flèche indique la destination.")
+      ),
+      
+      conditionalPanel(
+        "input.classParams.includes('4') & input.studyType.includes('1')",
+        h4("Circulation sur la chausée"),
+        p("Il peut être intéressant pour comprendre l'utilisation d'un carrefour de relever où les usagers circulent. La courbe affiché permet de distinger les utilisations de la chaussée des utilisations du trotoir.")
+      ),
+      
+      
     ),
   
     
