@@ -77,7 +77,10 @@ drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TR
   else classList <- StudiedClass
   for (cl in classList)
   {
-    if (!AllTrajectoriesOnOneGraph) drawEmptyPlot(paste("Trajectories of", cl))
+    if (!AllTrajectoriesOnOneGraph){
+      par(mfrow=c(2,2))# Grille
+      drawEmptyPlot(paste("Trajectories of", cl))
+    } 
     for (tId in unique(subDataset[class == cl, trackId])) {
       
       lines(unlist(subDataset[trackId == tId, xCenter]),
@@ -89,8 +92,8 @@ drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TR
                           'bicycle'='green')))
     }
   }
-  legend(1,1, legend=c('Voitures','Bus','Piétons','Cyclistes'), 
-         col=c('red','yellow','blue', 'green'), lty=1, cex=0.8, lwd=2)
+  if(legend) legend(1,1, legend=c('Voitures','Bus','Piétons','Cyclistes'),
+                    col=c('red','yellow','blue', 'green'), lty=1, cex=0.8, lwd=2)
 }
 
 #==========================================

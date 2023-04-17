@@ -74,7 +74,11 @@ detailledStudy <- function(input, output){
                        
                        textInput("trackIdInterraction",
                                  label = h4("track à étudier"),
-                                 value = 700000
+                                 value = 7
+                       ),
+                       textInput("recordingInput",
+                                 label = h4("Recording"),
+                                 value = 0
                        ),
                        # ch <- list(trajectoriesDataset[,'trackId']),
                        # names(ch)<-ch,
@@ -203,8 +207,7 @@ detailledStudy <- function(input, output){
       
       # INTERRACTION
       #  sk
-      conditionalPanel(
-        "input.studyType.includes('3')",
+      conditionalPanel("input.studyType.includes('3')",
         plotOutput("interractionPlot", height = "auto")
       ),
 

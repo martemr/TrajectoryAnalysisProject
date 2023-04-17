@@ -76,10 +76,13 @@ detailledStudyServer <- function(input, output){
   
   
   output$interractionPlot <- renderPlot({
+    tId <- as.numeric(input$trackIdInterraction)
+    rId <- as.numeric(input$recordingInput)
+    plotTrackInterractions(tId,rId)
     #drawEmptyPlot("")
     # tId <- input$trackIdInterraction
     # plotTrackInterractions(tId, 7)# trajectoriesDataset[trackId==tId, recordingId])
-  })
+  }, width = 900, height=600)
   
 }
   
