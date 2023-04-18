@@ -112,7 +112,8 @@ printInterractions <- function(studiedDatasetRecording, studiedTrackId, couplesI
 # Affichage des interractions d'une trajectoire
 #==========================================
 plotTrackInterractions <- function(studiedTrackId, rId){
-  print("1")
+  studiedTrackId <- as.integer(studiedTrackId)
+  rId <- as.integer(rId)
   studiedDatasetRecording <- trajectoriesDataset[recordingId==rId,]
   # On ne va s'intéresser qu'aux trajectoires qui ne sont pas dans le même cluster
   # idList <- unique(studiedDatasetRecording[
@@ -120,7 +121,6 @@ plotTrackInterractions <- function(studiedTrackId, rId){
   #     !(trackId %in% clusters[clusterId==1, trackId]), # PAS DANS LE MEME CLUSTER 
   #   trackId])
   idList <- unique(studiedDatasetRecording[,trackId])
-  print("2")
   idList <- selectSameTimeId(studiedDatasetRecording, studiedTrackId, idList) 
   # idList <- idList[idList != studiedTrackId] # On enleve la trajectoire étudié du dataset
   #print(paste("Trajectoires au même moment :",list(idList)))
@@ -130,9 +130,8 @@ plotTrackInterractions <- function(studiedTrackId, rId){
   
   couplesInterractionsXY <- selectClosestPoints(studiedDatasetRecording, studiedTrackId, idList)
   #print(paste("La trajectoire", studiedTrackId, "a un interraction avec la trajectoire", list(unique(couplesInterractionsXY$trackId))))
-  print("3")
   printInterractions(studiedDatasetRecording, studiedTrackId, couplesInterractionsXY)
-  print("4")
+  list(unique(couplesInterractionsXY$trackId))
 }
 
 

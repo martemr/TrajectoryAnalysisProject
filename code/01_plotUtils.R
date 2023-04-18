@@ -165,4 +165,14 @@ drawOnRoad <- function(trajectoriesDataset, studiedClass, LocId){
          col=c(convertColor(TRUE),convertColor(FALSE)), lty=1, cex=0.8, lwd=2)
 }
 
+#==========================================
+# Calculer l'angle de direction d'un objet en fonction de sa vitesse x,y
+#==========================================
+getHeading <- function(xVelocity,yVelocity){
+  if(xVelocity<0 & yVelocity<0){
+    ((atan(yVelocity/xVelocity) * (180/pi))+180)%%360
+  } else {
+    (atan(yVelocity/xVelocity) * (180/pi))%%360
+  }
+}
 
