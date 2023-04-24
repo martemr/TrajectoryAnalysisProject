@@ -1,0 +1,24 @@
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : April 2023, 24th
+# Description : Installation des packages necessaires au bon fonctionnement
+##---------------------------------------------
+
+#==========================================
+# Essentiels
+#==========================================
+install.packages("dplyr")
+install.packages("data.table")
+install.packages("concaveman")
+
+#==========================================
+# Clustering
+#==========================================
+install.packages("sp")
+
+#==========================================
+# Graphiques
+#==========================================
+install.packages("png")

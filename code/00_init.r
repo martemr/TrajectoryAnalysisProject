@@ -10,10 +10,8 @@
 # Librairies
 #==========================================
 library(dplyr)
-library(png)
 library(data.table)
 library(concaveman)
-library(sp)
 
 #==========================================
 # Calcul de distance
