@@ -1,5 +1,14 @@
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : March 2023, 29th
+# Description : Interactions
+##---------------------------------------------
 
-
+#==========================================
+# Selection des trajectoires qui sont présent sur les mêmes frames que la studiedTrackId
+#==========================================
 selectSameTimeId <- function(studiedDatasetRecording, studiedTrackId, idToFilter=unique(studiedDatasetRecording$trackId)){
   ids <- unique(idToFilter[idToFilter %in% unique(studiedDatasetRecording[frame > min(studiedDatasetRecording[trackId == studiedTrackId,frame]) & 
                                                                             frame < max(studiedDatasetRecording[trackId == studiedTrackId,frame]) 
@@ -7,7 +16,9 @@ selectSameTimeId <- function(studiedDatasetRecording, studiedTrackId, idToFilter
   ids[ids!=studiedTrackId]
 }
 
-# Champ de vision
+#==========================================
+# Calcul de la zone de champ de vision
+#==========================================
 getViewFieldPoints <- function(studiedTrackId,studiedFrame, numberOfPoints=10){
   viewField <- data.table()
   for (d in seq(numberOfPoints,1)*10){
@@ -27,27 +38,27 @@ getViewFieldPoints <- function(studiedTrackId,studiedFrame, numberOfPoints=10){
                                 distanceToTranslate = d )
     )
   }
-  
   viewField<- rbind(viewField, viewField[1])
   viewField
 }
 
-# Translation de distanceToTranslate
+#==========================================
+# Translation vectorielle d'une distance distanceToTranslate
+#==========================================
 translate <- function(x,y,angle,distanceToTranslate=10){
   angle = angle * (pi / 180)
   data.table(xCenter=(x + distanceToTranslate * cos(angle)),
              yCenter=(y + distanceToTranslate * sin(angle)))
 }
 
-
-
-# Définition du sens 
+#==========================================
+# Calcul du sens relatif de deux angles de direction
+#==========================================
 getSens <- function(angle1, angle2){
   angle=abs(angle1-angle2)
   if(angle>180){
     angle=angle-180
   }
-  
   if(angle<10) {
     "identique"
   } else if (angle<90){
@@ -61,22 +72,23 @@ getSens <- function(angle1, angle2){
   }
 }
 
-for (s in seq(1,10))
-
-
+#==========================================
+# Calcul de la distance de sécurité
+#==========================================
 getStopDistance <- function(speed){
   unlist(speed+(speed/10)^2)
 }
 
-
+#==========================================
+# Calcul de la vitesse d'un point
+#==========================================
 getSpeed <- function(xSpeed,ySpeed){
   unlist(sqrt(xSpeed^2+ySpeed^2))
 }
 
-
-
-
-# Itération pour chaque frame
+#==========================================
+# Calcul de l'interaction de chaque frame
+#==========================================
 getInteractionsOfTrack <- function(studiedTrackId, studiedRecordingId=0, plotArea=FALSE, verbose=FALSE){
   if(plotArea) drawEmptyPlot(paste('Interactions of',studiedTrackId))
   
@@ -185,14 +197,20 @@ getInteractionsOfTrack <- function(studiedTrackId, studiedRecordingId=0, plotAre
 
 
 
-
-interactionsDataset <- data.table()
-count=0
-for (t in (tracksMeta[recordingId==0,trackId])){
-  print(paste('Track',t,":",paste(count,"/",n_distinct(tracksMeta[recordingId==0,trackId]),sep="")))
-  interactionsDataset <- rbind(interactionsDataset,getInteractionsOfTrack(t,0))
-  count=count+1
+#==========================================
+# Création du jeu de données 'interaction'
+#==========================================
+createInteractionDataset <- function(){
+  interactionsDataset <- data.table()
+  count=0
+  for (t in (tracksMeta[recordingId==0,trackId])){
+    print(paste('Track',t,":",paste(count,"/",n_distinct(tracksMeta[recordingId==0,trackId]),sep="")))
+    interactionsDataset <- rbind(interactionsDataset,getInteractionsOfTrack(t,0))
+    count=count+1
+  }
+  interactionsDataset
 }
+
 
 
 
