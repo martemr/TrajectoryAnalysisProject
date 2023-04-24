@@ -16,9 +16,17 @@ install.packages("concaveman")
 #==========================================
 # Clustering
 #==========================================
-install.packages("sp")
+install.packages("dbscan")
 
 #==========================================
 # Graphiques
 #==========================================
 install.packages("png")
+install.packages("arrow")
+install.packages("factoextra")
+
+
+install.packages("")
+install.packages("")
+install.packages("")
+

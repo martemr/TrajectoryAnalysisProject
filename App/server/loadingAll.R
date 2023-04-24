@@ -7,7 +7,7 @@ loadAll <- function(input, output){
     source("~/TrajectoryAnalysisProject/code/01_plotUtils.R", echo = FALSE)
     source("~/TrajectoryAnalysisProject/code/02_visualisationUtils.R", echo = FALSE)
     source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo = FALSE)
-    source("~/TrajectoryAnalysisProject/code/analysis/07_interractions.R", echo = FALSE)
+    #source("~/TrajectoryAnalysisProject/code/analysis/07_interractions.R", echo = FALSE)
     
     # Chargement des données
     incProgress(1/nEtapes, detail = paste("Téléchargement des données"))
