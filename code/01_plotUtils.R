@@ -100,7 +100,7 @@ drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TR
 # Tracé des clusters
 #==========================================
 drawClusters <- function(selectedClass='car', LocationId, clusters, clusterMeta, clusterId='ALL', AllTrajectoriesOnOneGraph = TRUE, annotation=FALSE){
-  if(annotation) stop("Not implemented")
+  if(annotation) stop("Not implemented") # TODO
   
   # Selection du cluster à afficher
   clusterIdList <- unique(clusters$clusterId)
