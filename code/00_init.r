@@ -12,6 +12,7 @@
 library(dplyr)
 library(data.table)
 library(concaveman)
+library(sp) # Pointin polygon
 
 #==========================================
 # Calcul de distance
