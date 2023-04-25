@@ -31,11 +31,11 @@ detailledStudy <- function(input, output){
           choices = list(
             "Trajectoires" = 1,
             "Groupes de trajectoire" = 2,
-            "Flux" = 3,
-            "Circulation sur la chausée" = 4, 
-            "Vitesse" = 5,
-            "Zone d'attente" = 6,
-            "Inclure annotations" = 7
+            "Flux" = 3#,
+            #"Circulation sur la chausée" = 4, 
+            #"Vitesse" = 5,
+            #"Zone d'attente" = 6,
+            #"Inclure annotations" = 7
           ),
         ),
       ),
@@ -55,30 +55,31 @@ detailledStudy <- function(input, output){
           ),
         ),
 
-        checkboxGroupInput(
-          "timeCompare",
-          label = h4("Horaires à comparer"),
-          choices = list(
-            "1"   = 1,
-            "1"  = 2,
-            "1" = 3,
-            "1" = 4
-          ),
-          selected = 1
-        ),
+        # checkboxGroupInput(
+        #   "timeCompare",
+        #   label = h4("Horaires à comparer"),
+        #   choices = list(
+        #     "1"   = 1,
+        #     "1"  = 2,
+        #     "1" = 3,
+        #     "1" = 4
+        #   ),
+        #   selected = 1
+        # ),
       ),
   
   
       conditionalPanel("input.studyType.includes('3')",
                        h3("Parametres d'étude"),
-                       
+
+                       textInput("recordingInput",
+                                 label = h4("Choisir l'enregistrement sur lequel prendre les interactions"),
+                                 value = 0),
                        textInput("trackIdInterraction",
                                  label = h4("track à étudier"),
                                  value = 7
                        ),
-                       textInput("recordingInput",
-                                 label = h4("Recording"),
-                                 value = 0
+                       
                        ),
                        # ch <- list(trajectoriesDataset[,'trackId']),
                        # names(ch)<-ch,
@@ -87,7 +88,7 @@ detailledStudy <- function(input, output){
                        # )
                        
                        
-      ),
+      #),
       
       
       # DESCRIPTION
@@ -165,25 +166,25 @@ detailledStudy <- function(input, output){
         withSpinner(plotOutput("flowDiagram", height =800), type = 1)
       ),
       
-      #  Circulations sur la chausée
-      conditionalPanel(
-        "input.classParams.includes('4') & input.studyType.includes('1')",
-        withSpinner(plotOutput("onRoadPlot", height=800), type=1)
-      ), 
-      
-      #  Vitesse
-      conditionalPanel(
-        "input.classParams.includes('5') & input.studyType.includes('1')",
-        withSpinner(plotOutput("speedHeatMap", height=800), type=1)
-      ),
-      
-      #  Zone d'attente
-      conditionalPanel(
-        "input.classParams.includes('6') & input.studyType.includes('1')",
-        plotOutput("waitingArea", height=800)
-      ),
-      
-      #  Inclure annotations
+      # #  Circulations sur la chausée
+      # conditionalPanel(
+      #   "input.classParams.includes('4') & input.studyType.includes('1')",
+      #   withSpinner(plotOutput("onRoadPlot", height=800), type=1)
+      # ), 
+      # 
+      # #  Vitesse
+      # conditionalPanel(
+      #   "input.classParams.includes('5') & input.studyType.includes('1')",
+      #   withSpinner(plotOutput("speedHeatMap", height=800), type=1)
+      # ),
+      # 
+      # #  Zone d'attente
+      # conditionalPanel(
+      #   "input.classParams.includes('6') & input.studyType.includes('1')",
+      #   plotOutput("waitingArea", height=800)
+      # ),
+      # 
+      # #  Inclure annotations
       
       
       
@@ -197,17 +198,16 @@ detailledStudy <- function(input, output){
         plotOutput("countChart", height = "auto")
         ),
       
-      #  Horaires
-      conditionalPanel(
-        "input.timeCompare.length>0 & input.studyType.includes('2')",
-                       plotOutput("timeCompare", height = "auto")
-      ),
+      # #  Horaires
+      # conditionalPanel(
+      #   "input.timeCompare.length>0 & input.studyType.includes('2')",
+      #                  plotOutput("timeCompare", height = "auto")
+      # ),
       
       
       
       # INTERRACTION
-      #  sk
-      conditionalPanel("input.studyType.includes('3')",
+      conditionalPanel("input.classParams.length>0 & input.studyType.includes('3')",
         plotOutput("interractionPlot", height = "auto")
       ),
 

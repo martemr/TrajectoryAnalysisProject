@@ -28,6 +28,6 @@ welcomePage <- function(){
     ),
     fluidRow(align = 'center',
              img(src = 'plaquette.png', align = "center"),),
-    fluidRow(align = 'center', withSpinner(textOutput("clustersLoad"), type = 1)),
+    fluidRow(align = 'center', textOutput("clustersLoad")),
   )
 }

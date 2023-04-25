@@ -67,21 +67,12 @@ detailledStudyServer <- function(input, output){
     LocId <- input$LocalisationId
     drawPieChart(LocId)
   }, width = 900, height=600)
-
-  
   
   # INTERRACTIONS
-  #  Tableau des comptages
-  
-  
-  
   output$interractionPlot <- renderPlot({
     tId <- as.numeric(input$trackIdInterraction)
     rId <- as.numeric(input$recordingInput)
-    plotTrackInterractions(tId,rId)
-    #drawEmptyPlot("")
-    # tId <- input$trackIdInterraction
-    # plotTrackInterractions(tId, 7)# trajectoriesDataset[trackId==tId, recordingId])
+    drawAllInteractionsTrack(tId)
   }, width = 900, height=600)
   
 }
