@@ -1,9 +1,14 @@
 library(data.table)
 library(matlib)
 
-defineKalman <- function(trackIdToPredict=8, sampleSize=10){
+#==========================================
+#  Define for the first values the next point, covalence, transition matrix and model noise
+#==========================================
+defineKalman <- function(trackIdToPredict=8, frameToStartPrediction=1802, startsampleSize=10){
   # Récupération des données
-  data = tracks[trackId==trackIdToPredict, .(frame,xCenter,xVelocity,yCenter,yVelocity, xAcceleration, yAcceleration)]
+  frameToStartPrediction=1802
+  data = tracks[trackId==trackIdToPredict & frame>=frameToStartPrediction, .(frame,xCenter,xVelocity,yCenter,yVelocity, xAcceleration, yAcceleration)]
+  print(data)
   trackClass = unique(tracksMeta[trackId==trackIdToPredict,class])
 
   # DEFINITION DES PARAMETRES
@@ -142,10 +147,10 @@ predictKalmanPosition <- function(tId, timeToPredict=3, trainingSize=10, uncerta
   result = data.table(time=0,x=predictedValue[1], y=predictedValue[2],
                       dx=0,dy=0, heading=getHeading(predictedValue[3], predictedValue[4]))
   for (ind in seq(1,timeToPredict)){
-    for (r in seq(1,25)){
+    #for (r in seq(1,25)){
       predictedValue <- resultKalman$TransitionMatrix %*% predictedValue
       predictedValueCovariance <- resultKalman$TransitionMatrix %*% predictedValueCovariance %*% t(resultKalman$TransitionMatrix) + resultKalman$ModelNoise
-    }
+    #}
     result <- rbind(result,list(ind,predictedValue[1],predictedValue[2],
                                 predictedValueCovariance[1,1], predictedValueCovariance[2,2],
                     getHeading(predictedValue[3], predictedValue[4])))
