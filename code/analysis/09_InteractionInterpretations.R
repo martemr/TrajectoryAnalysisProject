@@ -1,3 +1,13 @@
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : February 2023, 20th
+# Description : Interprétation des résultats du dataset interactions
+##---------------------------------------------
+
+
+
 interactionsDataset <- data.table(read.csv("~/TrajectoryAnalysisProject/run interactions 24.04.23/interactionsDataset.csv"))
 
 addClassInteractionsDataset <- function(interactionsDataset){

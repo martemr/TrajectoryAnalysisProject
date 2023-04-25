@@ -12,21 +12,22 @@
 install.packages("dplyr")
 install.packages("data.table")
 install.packages("concaveman")
+install.packages("logr") # Logs des interactions
 
 #==========================================
 # Clustering
 #==========================================
-install.packages("dbscan")
+install.packages("dbscan") # Méthode de clustering
 
 #==========================================
 # Graphiques
 #==========================================
-install.packages("png")
-install.packages("arrow")
-install.packages("factoextra")
+install.packages("png") # Pour les backgrounds image
+install.packages("arrow") 
+install.packages("factoextra") #
+install.packages("sp") # Géométrie
 
 
-install.packages("")
 install.packages("")
 install.packages("")
 
