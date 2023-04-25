@@ -69,11 +69,11 @@ drawAllInteractionsTrack <- function(studiedTrack){
 }
 
 
-trackIds <- unique(interactionsDataset[,.(trackId1,trackId2)])
+trackIds <- unique(interactionsDataset[class1=='car' & class2=='bicycle' & interaction=='Conflit',.(trackId1,trackId2)])
 for (t in seq(1,nrow(trackIds))){
   print(paste("Tracks",trackIds[t]))
   drawInterractions(unlist(trackIds[t])[1],
-                    unlist(trackIds[t])[2], interactionsDataset)
+                    unlist(trackIds[t])[2])
   readline()
   }
 

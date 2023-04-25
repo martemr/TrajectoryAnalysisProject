@@ -28,9 +28,10 @@ library(sp)
 #==========================================
 # TRI PAR TEMPORALITE -----
 selectSameTimeId <- function(studiedDatasetRecording, studiedTrackId, idToFilter=unique(studiedDatasetRecording$trackId)){
-  idToFilter[idToFilter %in% unique(studiedDatasetRecording[frame > min(studiedDatasetRecording[trackId == studiedTrackId,frame]) & 
+  ids <- unique(idToFilter[idToFilter %in% unique(studiedDatasetRecording[frame > min(studiedDatasetRecording[trackId == studiedTrackId,frame]) & 
                                               frame < max(studiedDatasetRecording[trackId == studiedTrackId,frame]) 
-                                              ,trackId])]
+                                              ,trackId])])
+  ids[ids!=studiedTrackId]
 }
 # -------------------------
 
