@@ -1,6 +1,5 @@
 library(shiny)
 library(shinycssloaders)
-#library(ggplot2)
 source("./ui/welcomePage.R")
 source("./ui/generalPage.R")
 source("./ui/detailledStudyPage.R")
@@ -20,7 +19,6 @@ ui <-
 
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
-  #if(!exists("initDone")) 
   loadAll(input,output)
 
   generalServer(input,output)

@@ -55,11 +55,6 @@ detailledStudyServer <- function(input, output){
     data.table("Type"=c(cl, "Total"),
                "Comptage" = c(lapply(cl, function(x) paste(round((n_distinct(trajectoriesDataset[locationId==LocId & class == x, 'trackId'])/ totalTime), 0), 'usagers/heure')),
                                      paste(round((n_distinct(trajectoriesDataset[locationId==LocId,trackId])/totalTime),0),'usagers/heure')))
-                              
-                              # ,
-                              # paste(round((n_distinct(trajectoriesDataset[locationId==LocId & class == 'pedestrian'          , 'trackId'])/ totalTime), 0), 'usagers/heure'),
-                              # paste(round((n_distinct(trajectoriesDataset[locationId==LocId & class == 'bicycle'             , 'trackId'])/ totalTime), 0), 'usagers/heure'),
-                              # paste(round((n_distinct(trajectoriesDataset[locationId==LocId,trackId])/totalTime),0),'usagers/heure')))
   })
   
   #  Diagramme en camembert des comptes
@@ -67,6 +62,7 @@ detailledStudyServer <- function(input, output){
     LocId <- input$LocalisationId
     drawPieChart(LocId)
   }, width = 900, height=600)
+  
   
   # INTERRACTIONS
   output$interractionPlot <- renderPlot({
