@@ -7,9 +7,9 @@
 ##---------------------------------------------
 
 #==========================================
-# 
+# cluster par distance
 #==========================================
-createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=3, plot=FALSE, maxDistance=1000, distanceTreshold = 10){
+createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=3, plot=FALSE, maxDistance=5, distanceTreshold = 200){
   print("Creating clusters")
   startTime <- Sys.time()
   
@@ -115,6 +115,9 @@ createDistanceClusters <- function(LocId, ClusteringClass="car", minSizecluster=
   endTime <- Sys.time()
   print(paste("Clusters created in", round(endTime-startTime, 2), "secondes"))
   
-  if (plot)  drawClusters(selectedClass = "pedestrian", 1, clusters = clustersTemp[clusterId %in% clusterMeta$clusterId] ,clusterMeta = clusterMeta, AllTrajectoriesOnOneGraph = TRUE)
+  if (plot) {
+    par(mfrow=c(2,2))
+    drawClusters(selectedClass = "pedestrian", 1, clusters = clustersTemp[clusterId %in% clusterMeta$clusterId] ,clusterMeta = clusterMeta, AllTrajectoriesOnOneGraph = FALSE)
+  }
   list(clusterMeta = clusterMeta, clusterTemp = clustersTemp)
   }
