@@ -6,6 +6,8 @@
 # Description : Interactions
 ##---------------------------------------------
 
+library(logr)
+
 #==========================================
 # Selection des trajectoires qui sont présent sur les mêmes frames que la studiedTrackId
 #==========================================
@@ -187,30 +189,41 @@ getInteractionsOfTrack <- function(studiedTrackId, studiedRecordingId=0, plotAre
   }
   end_time <- Sys.time()
   #interactionsTotal <- cbind(interactionsTotal, 'executionTime'=end_time-start_time)
-  print(paste("Execution time", end_time-start_time))
+  log_print(paste("Execution time", end_time-start_time))
   interactionsTotal
 }
 
-
-
-
-
-
-
 #==========================================
-# Création du jeu de données 'interaction'
+# Création du jeu de données 'interaction' pour le recording id selectionné
 #==========================================
-createInteractionDataset <- function(){
+createInteractionDataset <- function(recordingId){
+  # Create temp file location
+  tmp <- file.path(format(Sys.time(), "interactionsDataset_%d-%m-%Y_%H-%M-%S.log"))
+  # Open log
+  lf <- log_open(tmp)
+  
   interactionsDataset <- data.table()
   count=0
-  for (t in (tracksMeta[recordingId==0,trackId])){
-    print(paste('Track',t,":",paste(count,"/",n_distinct(tracksMeta[recordingId==0,trackId]),sep="")))
+  for (t in (tracksMeta[recordingId==recordingId,trackId])){
+    log_print(paste('Track',t,":",paste(count,"/",n_distinct(tracksMeta[recordingId==0,trackId]),sep="")))
     interactionsDataset <- rbind(interactionsDataset,getInteractionsOfTrack(t,0))
     count=count+1
   }
+  
+  # Close log
+  log_close()
+  
   interactionsDataset
 }
 
-
+#==========================================
+# Création du jeu de données 'interaction' pour tous les recordings
+#==========================================
+createAllInteractionDataset <- function(){
+  fullInteractionsDataset <- data.table()
+  for (r in unique(trajectoriesDataset$recordingId)){
+    fullInteractionsDataset <- rbind(fullInteractionsDataset,createAllInteractionDataset(r))
+  }
+}
 
 
