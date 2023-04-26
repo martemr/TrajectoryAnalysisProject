@@ -16,6 +16,7 @@ Le langage utilisé tous le long du projet est le R. La structure du code est la
 &nbsp;&nbsp;&nbsp;&nbsp; \|-- `www` *Images de l'appli*
 
 &nbsp;&nbsp; \|-- `code/` *Codes permetant de traiter et visualiser les données* \
+
 &nbsp;&nbsp;&nbsp;&nbsp; \|-- `00_setup.R`   ***Installation de toutes les librairies utilisés dans les codes*** \
 &nbsp;&nbsp;&nbsp;&nbsp; \|-- `01_init.R`      *Fonctions de chargement et nettoyage des données dans l'environnement* \
 &nbsp;&nbsp;&nbsp;&nbsp; \|-- `02_plotUtils.R` *Fonctions permettant l'affichage de trajectoires et plans 2D* \
@@ -26,6 +27,7 @@ Le langage utilisé tous le long du projet est le R. La structure du code est la
 &nbsp;&nbsp;&nbsp;&nbsp; \|-- `visualisation/` *Codes permetant d'afficher des graphiques particuliers (flux, cartes de chaleur, etc.)* 
 
 &nbsp;&nbsp; \|-- `data/` ***Dossier dans lequel déposer les données à analyser*** 
+
 
 &nbsp;&nbsp; \|-- `safetyCriteria.Rmd` *Deprecated depuis 04/2023*
 
