@@ -31,7 +31,7 @@ sum_distance <- function(x, y) {
 #==========================================
 # Chargement des Données
 #==========================================
-loadData <- function(dosinit){
+loadData <- function(dosinit="../data/"){
   print(paste("Chargement des données"))
   # Charge toutes les Metadonnées des recordings
   recordingMeta <- data.table()
