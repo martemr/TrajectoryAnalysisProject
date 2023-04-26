@@ -4,6 +4,7 @@
 # Author : Martin Emery
 # Date : February 2023, 24th
 # Description : Recherche de clusters par distances entre courbes
+# ___________DEPRECATED___________
 ##---------------------------------------------
 
 #==========================================

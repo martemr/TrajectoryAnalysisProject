@@ -5,6 +5,7 @@
 # Date : February 2023, 20th
 # Description : Make trajectories cluster by heading
 # Production : Un dataframe de clusters (clusters) qui associe à chaque trackId un clusterId
+# ___________DEPRECATED___________
 ##---------------------------------------------
 
 #==========================================

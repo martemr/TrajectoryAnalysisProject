@@ -1,3 +1,12 @@
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : March 2023, 20th
+# Description : Application de visualisation des données (Trajectoires sur carrefour par vue aérienne)
+##---------------------------------------------
+
+# Chargement des librairies et codes
 library(shiny)
 library(shinycssloaders)
 source("./ui/welcomePage.R")
@@ -26,4 +35,5 @@ server <- function(input, output) {
   detailledStudyServer(input,output)
 }
 
+# Run app
 shinyApp(ui = ui, server = server)

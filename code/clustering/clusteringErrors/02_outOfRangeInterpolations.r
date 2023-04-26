@@ -4,6 +4,7 @@
 # Author : Martin Emery
 # Date : February 2023, 22th
 # Description : Decryptage de l'erreur de lecture de la fonction d'interpolation hors de l'intervalle de la fonction d'origine
+# ___________DEPRECATED___________
 ##---------------------------------------------
 
 #==========================================

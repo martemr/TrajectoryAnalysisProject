@@ -1,5 +1,13 @@
-generalServer <- function(input, output){
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : March 2023, 20th
+# Description : Server de la page "général"
+##---------------------------------------------
 
+generalServer <- function(input, output){
+  # Traduction des jours en Francais
   convertDay <- function(day){
     switch(day,
       "monday"   = "lundi",
@@ -39,7 +47,6 @@ generalServer <- function(input, output){
       drawTrajectories(LocId, dosinit, AllTrajectoriesOnOneGraph = TRUE, legend=TRUE)
     }, sizePolicy = sizeGrowthRatio(width= 900, height = 600, growthRate = 1),
     cacheKeyExpr = {list(input$LocalisationId)})
-  
 }
 
   

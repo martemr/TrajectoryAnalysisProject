@@ -26,8 +26,3 @@ install.packages("png") # Pour les backgrounds image
 install.packages("arrow") 
 install.packages("factoextra") #
 install.packages("sp") # Géométrie
-
-
-install.packages("")
-install.packages("")
-

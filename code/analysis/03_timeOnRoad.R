@@ -5,6 +5,7 @@
 # Date : March 2023, 01th
 # Description : Make trajectories cluster by heading
 # Production : Etude du temps passé sur la voie par les VRUs
+# ___________DEPRECATED___________
 ##---------------------------------------------
 
 #==========================================

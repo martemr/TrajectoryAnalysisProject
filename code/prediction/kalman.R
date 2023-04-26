@@ -1,14 +1,21 @@
-library(data.table)
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : March 2023, 20th
+# Description : Code permetant d'appliquer le filtre de Kalman à une trajectoire
+##---------------------------------------------
+
 library(matlib)
 
 #==========================================
 #  Define for the first values the next point, covalence, transition matrix and model noise
+# On fait tourner les itérations de kalman de la durée de vie 0 de la trajectoiren, à la frameToStopKalman
+# Retourne les matrices de transition, de covariance et les dernieres valeurs de covariance et de position
 #==========================================
-defineKalman <- function(trackIdToPredict=8, frameToStartPrediction=1802, startsampleSize=10){
+defineKalman <- function(trackIdToPredict=8, frameToStopKalman=1802){
   # Récupération des données
-  frameToStartPrediction=1802
-  data = tracks[trackId==trackIdToPredict & frame>=frameToStartPrediction, .(frame,xCenter,xVelocity,yCenter,yVelocity, xAcceleration, yAcceleration)]
-  print(data)
+  data = tracks[trackId==trackIdToPredict & frame>=frameToStopKalman, .(frame,xCenter,xVelocity,yCenter,yVelocity, xAcceleration, yAcceleration)]
   trackClass = unique(tracksMeta[trackId==trackIdToPredict,class])
 
   # DEFINITION DES PARAMETRES
@@ -44,8 +51,7 @@ defineKalman <- function(trackIdToPredict=8, frameToStartPrediction=1802, starts
   Q = I*5*10^-3
   # Bruit de mesure -> Faible car mesure fiable
   R = I*10^-6
-  
-  
+
   # Modélisation du processus de mesure (ici il ne modifie rien)
   H=diag(n)
   
@@ -87,6 +93,10 @@ defineKalman <- function(trackIdToPredict=8, frameToStartPrediction=1802, starts
   list("LastValue"=as.matrix(x_k_k), "LastCovariance"=as.matrix(P_k_k), "TransitionMatrix"=f, "ModelNoise"=Q)
 }
 
+
+#==========================================
+# Predict a value and a covariance using Kalman
+#==========================================
 predictKalman <- function(timeToPredict=3, tId, trainingSize=10, uncertainty=TRUE){
   resultKalman <- defineKalman(tId,trainingSize)
   
@@ -105,8 +115,9 @@ predictKalman <- function(timeToPredict=3, tId, trainingSize=10, uncertainty=TRU
   list(predictedValue, predictedValueCovariance)
 }
   
-
-# timeToPredict is in s
+#==========================================
+# Predict a value and a covariance using Kalman and plot it
+#==========================================
 predictKalmanPlot <- function(timeToPredict=3, tId, trainingSize=10, uncertainty=TRUE, newPlot=TRUE){
   resultKalman <- defineKalman(tId,trainingSize)
   
@@ -138,6 +149,9 @@ predictKalmanPlot <- function(timeToPredict=3, tId, trainingSize=10, uncertainty
          col=c('blue', 'red', 'green'), lty=1, lwd=3)
 }
 
+#==========================================
+# Return a prediction using kalman but in an array format with heading
+#==========================================
 predictKalmanPosition <- function(tId, timeToPredict=3, trainingSize=10, uncertainty=TRUE){
   resultKalman <- defineKalman(tId,trainingSize)
   

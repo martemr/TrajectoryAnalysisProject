@@ -1,7 +1,16 @@
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : March 2023, 20th
+# Description : Server de la page "Etude détaillée"
+##---------------------------------------------
+
 detailledStudyServer <- function(input, output){
-  
-  # CLASSE
-  #  Trajectoires
+  #==========================================
+  # Type d'étude : CLASSE
+  #==========================================
+  # Trajectoires
   output$classTrajectoire <- renderCachedPlot({
       print("Chargement trajectoire")
       LocId <- input$LocalisationId
@@ -10,7 +19,7 @@ detailledStudyServer <- function(input, output){
       print(" → done")
   }, cacheKeyExpr = {list(input$classId, input$LocalisationId)})
   
-  #  Groupes de trajectoires
+  # Groupes de trajectoires
   output$clusterTrajectoire <- renderCachedPlot({
     print("Chargement clusters")
     LocId <- input$LocalisationId
@@ -19,7 +28,7 @@ detailledStudyServer <- function(input, output){
     print(" → done")
   }, cacheKeyExpr = {list(input$classId, input$LocalisationId)})
   
-  #  Flux
+  # Flux
   output$flowDiagram <- renderCachedPlot({
     print("Chargement diagramme de flux")
     LocId <- input$LocalisationId
@@ -28,7 +37,7 @@ detailledStudyServer <- function(input, output){
     print(" → done")
   }, cacheKeyExpr = {list(input$classId, input$LocalisationId)})
   
-  #  Circulations sur la chausée
+  # Circulations sur la chausée
   output$onRoadPlot <- renderCachedPlot({
     print("Chargement ")
     LocId <- input$LocalisationId
@@ -38,14 +47,12 @@ detailledStudyServer <- function(input, output){
   }, cacheKeyExpr = {list(input$classId, input$LocalisationId)})
   
   #  Vitesse
-  
   #  Zone d'attente
-  
   #  Inclure annotations
   
-  
-  
-  # FREQUENTATION
+  #==========================================
+  # Type d'étude : FREQUENTATION
+  #==========================================
   #  Tableau des comptages
   output$countArray <- renderDataTable({
     LocId <- input$LocalisationId
@@ -63,8 +70,10 @@ detailledStudyServer <- function(input, output){
     drawPieChart(LocId)
   }, width = 900, height=600)
   
-  
-  # INTERRACTIONS
+  #==========================================
+  # Type d'étude : INTERRACTIONS
+  #==========================================
+  # Tracé d'interactions
   output$interractionPlot <- renderPlot({
     tId <- as.numeric(input$trackIdInterraction)
     rId <- as.numeric(input$recordingInput)

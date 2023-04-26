@@ -1,10 +1,22 @@
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : March 2023, 20th
+# Description : UI de la page "Acceuil"
+##---------------------------------------------
+
 welcomePage <- function(){
   tabPanel(
     "Accueil",
+    
+    # Logo Cerema
     fluidRow(
       textOutput("results"),
       img(src = 'logoCerema.png', align = "center")
     ),
+    
+    # Descripton de l'utilisation
     fluidRow(
       align = "center",
       titlePanel(
@@ -21,13 +33,19 @@ welcomePage <- function(){
       ),
       p("Le jeu de donnée ne nous donne pas accès aux vidéos originales."),
     ),
+    
+    # Texte de chargement des données
     fluidRow(
       align = 'center',
       h4("Données d'étude"),
       textOutput("waitingText")
     ),
+    
+    # Plaquette descritptive du projet
     fluidRow(align = 'center',
              img(src = 'plaquette.png', align = "center"),),
+    
+    # Appel au chargement en tache de fond des clusters
     fluidRow(align = 'center', textOutput("clustersLoad")),
   )
 }

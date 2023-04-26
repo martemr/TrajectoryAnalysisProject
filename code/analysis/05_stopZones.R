@@ -4,6 +4,7 @@
 # Author : Martin Emery
 # Date : February 2023, 28th
 # Description : Zones d'arrets
+# ___________DEPRECATED___________
 ##---------------------------------------------
 
 #==========================================

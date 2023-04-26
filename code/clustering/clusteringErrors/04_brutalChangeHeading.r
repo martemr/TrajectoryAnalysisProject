@@ -4,6 +4,7 @@
 # Author : Martin Emery
 # Date : February 2023, 22th
 # Description : Etude des changements brutaux de direction dans le recording 00, problème de detection
+# ___________DEPRECATED___________
 ##---------------------------------------------
 
 #==========================================
