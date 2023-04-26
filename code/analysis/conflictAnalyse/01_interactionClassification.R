@@ -196,7 +196,7 @@ getInteractionsOfTrack <- function(studiedTrackId, studiedRecordingId=0, plotAre
 #==========================================
 # Création du jeu de données 'interaction' pour le recording id selectionné
 #==========================================
-createInteractionDataset <- function(recordingId){
+createInteractionDataset <- function(recordingIdToSelect){
   # Create temp file location
   tmp <- file.path(format(Sys.time(), "interactionsDataset_%d-%m-%Y_%H-%M-%S.log"))
   # Open log
@@ -204,8 +204,8 @@ createInteractionDataset <- function(recordingId){
   
   interactionsDataset <- data.table()
   count=0
-  for (t in (tracksMeta[recordingId==recordingId,trackId])){
-    log_print(paste('Track',t,":",paste(count,"/",n_distinct(tracksMeta[recordingId==0,trackId]),sep="")))
+  for (t in (tracksMeta[recordingId==recordingIdToSelect,trackId])){
+    log_print(paste('Track',t,":",paste(count,"/",n_distinct(tracksMeta[recordingId==recordingIdToSelect,trackId]),sep="")))
     interactionsDataset <- rbind(interactionsDataset,getInteractionsOfTrack(t,0))
     count=count+1
   }
