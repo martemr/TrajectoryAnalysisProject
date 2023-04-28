@@ -6,8 +6,6 @@
 # Description : Interactions
 ##---------------------------------------------
 
-library(logr)
-
 #==========================================
 # Selection des trajectoires qui sont présent sur les mêmes frames que la studiedTrackId
 #==========================================
@@ -56,24 +54,34 @@ translate <- function(x,y,angle,distanceToTranslate=10){
 #==========================================
 # Calcul du sens relatif de deux angles de direction
 #==========================================
+# getSens <- function(angle1, angle2){
+#   angle=abs(angle1-angle2)
+#   if(angle>180){
+#     angle=angle-180
+#   }
+#   
+#   if(angle<10) {
+#     "identique"
+#   } else if (angle<90){
+#     "perp_suivi"
+#   } else if (angle<170){
+#     "perp_oppose"
+#   } else if (angle<180){
+#     "oppose"
+#   } else {
+#     stop("Angle négatif")
+#   }
+# }
+
 getSens <- function(angle1, angle2){
   angle=abs(angle1-angle2)
-  if(angle>180){
-    angle=angle-180
-  }
-  if(angle<10) {
-    "identique"
-  } else if (angle<90){
-    "perp_suivi"
-  } else if (angle<170){
-    "perp_oppose"
-  } else if (angle<180){
-    "oppose"
+  if(angle>180) angle=angle-180
+  if (angle>10 & angle<170){
+    "perp"
   } else {
-    stop("Angle négatif")
+    "id"
   }
 }
-
 #==========================================
 # Calcul de la distance de sécurité
 #==========================================
@@ -95,7 +103,6 @@ getInteractionsOfTrack <- function(studiedTrackId, studiedRecordingId=0, plotAre
   if(plotArea) drawEmptyPlot(paste('Interactions of',studiedTrackId))
   
   interactionsTotal <- data.table()
-  
   start_time <- Sys.time()
   
   # Récupération de toutes les track au même moment
@@ -117,20 +124,19 @@ getInteractionsOfTrack <- function(studiedTrackId, studiedRecordingId=0, plotAre
         shapeViewField[, 2]
       ))]
     
-    # print(paste("Speed", getSpeed(trajectoriesDataset[trackId==studiedTrackId & frame==f,.(xVelocity)],
-    #                               trajectoriesDataset[trackId==studiedTrackId & frame==f,.(yVelocity)])))
+    if(length(ids)==0) next # Skip si vide
     
-    if(plotArea){
-      points(trajectoriesDataset[trackId==studiedTrackId & frame==f, .(xCenter,yCenter)], col='red')
-      points(trajectoriesDataset[trackId %in% ids & frame==f, .(xCenter,yCenter)], col='green')
-    }
+    # if(plotArea){
+    #   points(trajectoriesDataset[trackId==studiedTrackId & frame==f, .(xCenter,yCenter)], col='red')
+    #   points(trajectoriesDataset[trackId %in% ids & frame==f, .(xCenter,yCenter)], col='green')
+    # }
     
     # Definition de l'interraction
     
     #  Recherche de la distance d'arret
     d = getStopDistance(getSpeed(trajectoriesDataset[trackId==studiedTrackId & frame==f,.(xVelocity)],
                                  trajectoriesDataset[trackId==studiedTrackId & frame==f,.(yVelocity)]))
-    if (d<4) d=4
+    if (d<2) d=2
     
     # Classification de l'interaction
     for(id in ids){
@@ -142,19 +148,22 @@ getInteractionsOfTrack <- function(studiedTrackId, studiedRecordingId=0, plotAre
       realDist <- euclidean(trajectoriesDataset[trackId==studiedTrackId & frame==f,.(xCenter,yCenter)],
                             trajectoriesDataset[trackId==id & frame==f,.(xCenter,yCenter)])
       
+      # Définition de l'interaction
       if(realDist>d){
-        interaction <- "Pas interaction"
-      } else if(realDist<d/2){
-        interaction <- "Conflit"
+        next # Pas d'interactions
+      } else if(realDist>d/2){
+        if(sens %in% c("perp")) {
+        interaction <- "Inconfort"
+        } else {next}
       } else {
-        if(sens %in% c("suivi","perp_suivi")) {
+        if(sens %in% c("id")) {
           interaction <-"Inconfort"
         } else {
           interaction <- "Conflit"
         }
       }
-      #print(paste("d"=d))  
-      #print(interactionsTotal)
+
+      # Ajout au tableau
       interactionsTotal <- rbind(interactionsTotal,
                                  list('trackId1'=studiedTrackId,
                                       'trackId2'=id,
@@ -166,26 +175,25 @@ getInteractionsOfTrack <- function(studiedTrackId, studiedRecordingId=0, plotAre
                                       ),fill=TRUE)
       
       
-      # Affichages
-      if(verbose){
-        print(paste("Interaction ",studiedTrackId,'-',id, sep=''))
-        print(paste(" > Seuil:",d,sep=''))
-        print(paste(" > Reel:" ,realDist,sep=''))
-        print(paste(" >",interaction))
+      # # Affichages
+      # if(verbose){
+      #   print(paste("Interaction ",studiedTrackId,'-',id, sep=''))
+      #   print(paste(" > Seuil:",d,sep=''))
+      #   print(paste(" > Reel:" ,realDist,sep=''))
+      #   print(paste(" >",interaction))
+      # }
+      # if(plotArea){
+      #   if(interaction=="Conflit"){
+      #     lines(x=unlist(trajectoriesDataset[trackId %in% c(studiedTrackId,id) & frame==f, .(xCenter)]),
+      #           y=unlist(trajectoriesDataset[trackId %in% c(studiedTrackId,id) & frame==f, .(yCenter)]),
+      #           col="red")
+      #   } else if(interaction=="Inconfort"){
+      #     lines(x=unlist(trajectoriesDataset[trackId %in% c(studiedTrackId,id) & frame==f, .(xCenter)]),
+      #           y=unlist(trajectoriesDataset[trackId %in% c(studiedTrackId,id) & frame==f, .(yCenter)]),
+      #           col="orange")
+      #   }
+      # }
       }
-      if(plotArea){
-        if(interaction=="Conflit"){
-          lines(x=unlist(trajectoriesDataset[trackId %in% c(studiedTrackId,id) & frame==f, .(xCenter)]),
-                y=unlist(trajectoriesDataset[trackId %in% c(studiedTrackId,id) & frame==f, .(yCenter)]),
-                col="red")
-        } else if(interaction=="Inconfort"){
-          lines(x=unlist(trajectoriesDataset[trackId %in% c(studiedTrackId,id) & frame==f, .(xCenter)]),
-                y=unlist(trajectoriesDataset[trackId %in% c(studiedTrackId,id) & frame==f, .(yCenter)]),
-                col="orange")
-        }
-        
-      }
-    }
   }
   end_time <- Sys.time()
   #interactionsTotal <- cbind(interactionsTotal, 'executionTime'=end_time-start_time)
@@ -232,3 +240,11 @@ createAllInteractionDataset <- function(startTrack=0,startDataset){
   fullInteractionsDataset
 }
 
+# Background job
+source("./code/01_init.r", echo = FALSE)
+source("./code/02_plotUtils.R", echo = FALSE)
+dosinit <<- "./data/"
+loadData(dosinit)
+cleanDataset()
+testDataset <- createInteractionDataset(0)
+fwrite(testDataset, "./testDataset.csv")
