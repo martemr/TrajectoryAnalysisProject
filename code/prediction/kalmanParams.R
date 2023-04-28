@@ -1,13 +1,15 @@
-library(onlineforecast)
-library(graphics)
+#---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : March 2023, 20th
+# Description : Calcul des paramêtres pour le filtre de kalman en fonction du jeu de données.
+# ___________DEPRECATED___________
+##---------------------------------------------
 
-
-# Définition du tableau des incertitudes
-incertitudes <- data.table(class=unique(trajectoriesDataset$class), 
-                           xPosition=NA, yPosition=NA,
-                           xSpeed=NA, ySpeed=NA, 
-                           xAcc=NA, yAcc=NA)
-
+#==========================================
+# Calcule la variance des variables de positions, vitesse et acceleration dans le dataset
+#==========================================
 computeVarianceArray <- function(trajectoriesDataset = trajectoriesDataset){
   trajectoriesDataset[, .(xPosition=var(xCenter) ,
                           yPosition=var(yCenter) ,
@@ -17,6 +19,9 @@ computeVarianceArray <- function(trajectoriesDataset = trajectoriesDataset){
                           yAcc     =var(yAcceleration)), by=c('trackId', 'class')]
 }
 
+#==========================================
+# Sert à la visualisation des variances
+#==========================================
 plotVarianceArray <- function(class='car'){
   variancesArray <- computeVarianceArray(trajectoriesDataset)
   
@@ -37,7 +42,12 @@ plotVarianceArray <- function(class='car'){
   }
 }
 
+
+#==========================================
+# Renvoie le percentile de la variance pour chaque variable de position, vitesse, acceleration de cette classe.
+#==========================================
 getVariancePercentile <- function(class='car', studiedVariable='xPosition', percentile=.90, digits=0){
   variancesArray <- computeVarianceArray(trajectoriesDataset)
   quantile(unlist(round(variancesArray[class==class, ..studiedVariable],digits=digits)),probs = c(percentile))
 }
+

@@ -4,18 +4,26 @@
 # Author : Martin Emery
 # Date : March 2023, 20th
 # Description : Code permetant d'appliquer le filtre de Kalman à une trajectoire
+# ___________DEPRECATED___________
 ##---------------------------------------------
 
 library(matlib)
+
+
+#==========================================
+# Initialisation des fonctions de calcul des paramêtres
+#==========================================
+#source() # TODO
 
 #==========================================
 #  Define for the first values the next point, covalence, transition matrix and model noise
 # On fait tourner les itérations de kalman de la durée de vie 0 de la trajectoiren, à la frameToStopKalman
 # Retourne les matrices de transition, de covariance et les dernieres valeurs de covariance et de position
 #==========================================
-defineKalman <- function(trackIdToPredict=8, frameToStopKalman=1802){
+defineKalman <- function(trackIdToPredict=8, trainingSize=10, startFrameTraining=0){
   # Récupération des données
-  data = tracks[trackId==trackIdToPredict & frame>=frameToStopKalman, .(frame,xCenter,xVelocity,yCenter,yVelocity, xAcceleration, yAcceleration)]
+  data = tracks[trackId==trackIdToPredict & frame>=startFrameTraining, .(frame,xCenter,xVelocity,yCenter,yVelocity, xAcceleration, yAcceleration)]
+  if(nrow(data)==0) return (list("LastValue"=NULL, "LastCovariance"=NULL, "TransitionMatrix"=NULL, "ModelNoise"=NULL))
   trackClass = unique(tracksMeta[trackId==trackIdToPredict,class])
 
   # DEFINITION DES PARAMETRES
@@ -66,7 +74,7 @@ defineKalman <- function(trackIdToPredict=8, frameToStopKalman=1802){
                      yAcc  =x_k_k[6])
   
   # CACUL DU FILTRE
-  for (i in seq(2,sampleSize)){
+  for (i in seq(2,trainingSize)){
     # Prediction
     x_k1_k <- f %*% x_k_k
     P_k1_k <- f %*% P_k_k %*% t(f) + Q 
@@ -95,7 +103,7 @@ defineKalman <- function(trackIdToPredict=8, frameToStopKalman=1802){
 
 
 #==========================================
-# Predict a value and a covariance using Kalman
+# DEPRECATED - Predict a value and a covariance using Kalman
 #==========================================
 predictKalman <- function(timeToPredict=3, tId, trainingSize=10, uncertainty=TRUE){
   resultKalman <- defineKalman(tId,trainingSize)
@@ -116,7 +124,7 @@ predictKalman <- function(timeToPredict=3, tId, trainingSize=10, uncertainty=TRU
 }
   
 #==========================================
-# Predict a value and a covariance using Kalman and plot it
+# DEPRECATED - Predict a value and a covariance using Kalman and plot it
 #==========================================
 predictKalmanPlot <- function(timeToPredict=3, tId, trainingSize=10, uncertainty=TRUE, newPlot=TRUE){
   resultKalman <- defineKalman(tId,trainingSize)
@@ -152,9 +160,9 @@ predictKalmanPlot <- function(timeToPredict=3, tId, trainingSize=10, uncertainty
 #==========================================
 # Return a prediction using kalman but in an array format with heading
 #==========================================
-predictKalmanPosition <- function(tId, timeToPredict=3, trainingSize=10, uncertainty=TRUE){
-  resultKalman <- defineKalman(tId,trainingSize)
-  
+predictKalmanPosition <- function(tId, timeToPredict=3, startFrameTraining=0, trainingSize=10, uncertainty=TRUE){
+  resultKalman <- defineKalman(tId,trainingSize, startFrameTraining=startFrameTraining)
+  print(is.null(resultKalman))
   predictedValue <- resultKalman$LastValue
   predictedValueCovariance <- resultKalman$LastCovariance
   

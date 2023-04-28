@@ -1,13 +1,27 @@
+##---------------------------------------------
+# Diagnostic SR via images aériennes
+# CEREMA
+# Author : Martin Emery
+# Date : March 2023, 20th
+# Description : Etablir un risque de colision entre 2 trajectoires
+# Dépendances : kalman.R
+# ___________DEPRECATED___________
+##---------------------------------------------
+
+
 library(sf)
 
 #==========================================
-#  
+#  Calcule le cône de prédiction de la position
 #==========================================
-getPolygonPrediction <- function(studiedTrackId, time=5, trainingSize=10, plot=FALSE, legend=FALSE){
+getPolygonPrediction <- function(studiedTrackId, time=3, trainingSize=10, startFrameTraining=0, plot=FALSE, legend=FALSE){
   #for(time in seq(1,5)){
     #drawEmptyPlot("")
     # Prédiction de ses positions future avec incertitudes
-    predictions <- predictKalmanPosition(studiedTrackId,timeToPredict=time,trainingSize = trainingSize)
+    predictions <- predictKalmanPosition(studiedTrackId,
+                                         timeToPredict=time,
+                                         startFrameTraining=startFrameTraining,
+                                         trainingSize = trainingSize)
     
     # Creation du cône de prédiction
     conesPoints <- data.table(x=unlist(predictions[,2])+unlist(predictions[,4])*cos((unlist(predictions[,6])+90)*pi/180),
@@ -29,16 +43,16 @@ getPolygonPrediction <- function(studiedTrackId, time=5, trainingSize=10, plot=F
 }
   
 #==========================================
-# 
+# Calcule le chevauchement entre les deux cônes
 #==========================================
-getCollisionRisk <- function(trackId1, trackId2, timeToPredict=3, trainingSize=10, toPlot=FALSE){
+getCollisionRisk <- function(trackId1, trackId2, timeToPredict=3, startFrameTraining=0, trainingSize=10, toPlot=FALSE){
   if(toPlot) {
     drawTrajectory(4,trackId1,dosinit,col='blue',newPlot=TRUE)
     drawTrajectory(4,trackId2,dosinit,col='blue',newPlot=FALSE)
   }
   # Get the area of predictions
-  poly1 <- getPolygonPrediction(trackId1,time=timeToPredict,trainingSize=trainingSize, plot=toPlot)
-  poly2 <- getPolygonPrediction(trackId2,time=timeToPredict,trainingSize=trainingSize, plot=toPlot)
+  poly1 <- getPolygonPrediction(trackId1,time=timeToPredict, startFrameTraining=startFrameTraining, trainingSize=trainingSize, plot=toPlot)
+  poly2 <- getPolygonPrediction(trackId2,time=timeToPredict, startFrameTraining=startFrameTraining, trainingSize=trainingSize, plot=toPlot)
   
   # Get the common area
   common_area <- st_intersection(poly1, poly2)
@@ -50,7 +64,7 @@ getCollisionRisk <- function(trackId1, trackId2, timeToPredict=3, trainingSize=1
 drawEmptyPlot("")
 par(mfrow=c(1,1))
 for(i in seq(1,8)*10){
-  print(getCollisionRisk(24,25,timeToPredict=75,trainingSize=i, toPlot=TRUE))
+  print(getCollisionRisk(24,25,timeToPredict=75,startFrameTraining=100000,trainingSize=i, toPlot=TRUE))
 }
 
 
