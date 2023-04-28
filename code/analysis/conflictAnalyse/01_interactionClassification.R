@@ -206,7 +206,7 @@ createInteractionDataset <- function(recordingIdToSelect){
   count=0
   for (t in (tracksMeta[recordingId==recordingIdToSelect,trackId])){
     log_print(paste('Track',t,":",paste(count,"/",n_distinct(tracksMeta[recordingId==recordingIdToSelect,trackId]),sep="")))
-    interactionsDataset <- rbind(interactionsDataset,getInteractionsOfTrack(t,0))
+    interactionsDataset <- rbind(interactionsDataset,getInteractionsOfTrack(studiedTrackId = t,studiedRecordingId = recordingIdToSelect))
     count=count+1
   }
   
@@ -219,11 +219,16 @@ createInteractionDataset <- function(recordingIdToSelect){
 #==========================================
 # Création du jeu de données 'interaction' pour tous les recordings
 #==========================================
-createAllInteractionDataset <- function(){
-  fullInteractionsDataset <- data.table()
-  for (r in unique(trajectoriesDataset$recordingId)){
-    fullInteractionsDataset <- rbind(fullInteractionsDataset,createAllInteractionDataset(r))
-  }
+createAllInteractionDataset <- function(startTrack=0,startDataset){
+  fullInteractionsDataset <<- data.table()
+  for (r in unique(trajectoriesDataset$recordingId)[2:32]){
+    result <- createInteractionDataset(r)
+    fwrite(result, paste("./interactionsDataset_",r,'.csv',sep=""))
+    fullInteractionsDataset <<- rbind(fullInteractionsDataset,result)
+    filepath <- file.path(format(Sys.time(), "./log/snapshot_%d-%m-%Y_%H-%M-%S.csv"))
+    fwrite(fullInteractionsDataset, filepath)
+    
+    }
+  fullInteractionsDataset
 }
-
 
