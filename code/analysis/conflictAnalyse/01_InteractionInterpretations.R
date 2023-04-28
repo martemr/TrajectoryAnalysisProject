@@ -7,14 +7,15 @@
 ##---------------------------------------------
 
 
-
+interactionsDataset <- fread("interactions/interactionsDataset_8.csv")
 interactionsDataset <- data.table(read.csv("~/TrajectoryAnalysisProject/run interactions 24.04.23/interactionsDataset.csv"))
 
 addClassInteractionsDataset <- function(interactionsDataset){
   interactionsDataset <- interactionsDataset[tracksMeta[,.(class1=class,trackId)], on=.(trackId1==trackId), nomatch=NULL]
   interactionsDataset <- interactionsDataset[tracksMeta[,.(class2=class,trackId)], on=.(trackId2==trackId), nomatch=NULL]
+  interactionsDataset
 }
-
+interactionsDataset <- addClassInteractionsDataset(interactionsDataset)
 
 #==========================================
 # Chord classes
@@ -27,16 +28,16 @@ InconfortAgency <- table(interactionsDataset[interaction=='Inconfort',.(class1,c
 NoInteractionAgency <- table(interactionsDataset[interaction=='Pas interaction',.(class1,class2)])
 
 # Make the circular plot
-par(mfrow=c(2,3))
-chordDiagram(conflitAgency      , transparency = 0.5)
-chordDiagram(InconfortAgency    , transparency = 0.5)
-chordDiagram(NoInteractionAgency, transparency = 0.5)
-
+par(mfrow=c(2,2))
+chordDiagram(conflitAgency      , annotationTrack = c("name",'grid'))
+title(main="Conflits")
+chordDiagram(InconfortAgency    , annotationTrack = c("name",'grid'))
+title(main="Inconforts")
 
 #==========================================
 # Affichage du nombre d'interactions par frame
 #==========================================
-plot(table(interactionsDataset[interaction %in% c('Conflit', 'Inconfort'),frame]),200)
+plot(density(interactionsDataset[interaction %in% c('Conflit', 'Inconfort'),frame]))
 
 
 
