@@ -14,7 +14,7 @@ library(png)
 #==========================================
 # Initialisation des paramêtres
 #==========================================
-initPlotImage <- function(LocationId, dosinit="../data/"){
+initPlotImage <- function(LocationId, dosinit="./data/"){
   fact <- switch(LocationId, 
                  '1' = 10.2,
                  '2' = 10.2, 

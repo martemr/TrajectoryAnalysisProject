@@ -15,6 +15,7 @@ source("./ui/detailledStudyPage.R")
 source("./server/loadingAll.R")
 source("./server/detailledStudyServer.R")
 source("./server/generalServer.R")
+setwd('../')
 
 
 # Define UI for app 
