@@ -34,7 +34,7 @@ Le langage utilisé tous le long du projet est le R. La structure du code est la
 
 ### Données d'exemple
 
-Les données utilisés pour la création de ce modèle sont accessibles au dépôt suivant : <https://www.ind-dataset.com/>
+Les données utilisés pour la création de ce modèle sont accessibles au dépôt suivant : <https://cerema.box.com/s/md5w308vq8oewjyojdrtnni4t1lc98f7> <https://www.ind-dataset.com/>
 
 ### Format de données
 
