@@ -12,10 +12,10 @@ loadAll <- function(input, output){
     
     # Définition des variables étudiés par les widgets
     incProgress(1/5, detail = paste("Chargement des fonctions")) # Barre de progression
-    source("~/TrajectoryAnalysisProject/code/01_init.r", echo = FALSE)
-    source("~/TrajectoryAnalysisProject/code/02_plotUtils.R", echo = FALSE)
-    source("~/TrajectoryAnalysisProject/code/03_visualisationUtils.R", echo = FALSE)
-    source("~/TrajectoryAnalysisProject/code/clustering/04_origine-destinationClustering.r", echo = FALSE)
+    source("../code/01_init.r", echo = FALSE)
+    source("../code/02_plotUtils.R", echo = FALSE)
+    source("../code/03_visualisationUtils.R", echo = FALSE)
+    source("../code/clustering/04_origine-destinationClustering.r", echo = FALSE)
     #source("~/TrajectoryAnalysisProject/code/analysis/07_interractions.R", echo = FALSE)
     
     # Chargement des données
