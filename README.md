@@ -71,6 +71,7 @@ Pour plus de détail sur le format des données voir : <https://www.ind-dataset.
 ## Utilisation
 
 -   Télécharger le dossier complet depuis github en zip ou en clonant le repository.
+-   Télécharger les données ou importer ses propres données dans un dossier `data` sous le format décrit précédemment.
 -   Ouvrir le projet `TrajectoryAnalysisProject.Rproj` sur **R studio**.
 -   Exécuter le code `00_setup.R` afin d'installer les librairies nécessaires. *(Cela peut prendre un certain temps)*
 -   **Pour utiliser l'application :** Exécuter le code `App/app.r`. L'application devrait s'ouvrir.
