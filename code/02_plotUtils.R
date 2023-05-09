@@ -61,12 +61,12 @@ drawVector <- function(x,y,angle,size=10, col='blue'){
 #==========================================
 # Tracé d'UNE trajectoire
 #==========================================
-drawTrajectory <- function(LocationId, tId, dosinit, type="l", col='black', newPlot=TRUE){
+drawTrajectory <- function(LocationId, tId, dosinit, type="l", col='black', newPlot=TRUE, lwd=1){
   if(newPlot){
     initPlotImage(LocationId, dosinit)
     drawEmptyPlot(paste("Trajectoire", tId))
   }
-  points(tracks[trackId==tId, .(xCenter, yCenter)], type=type, col=col)
+  points(tracks[trackId==tId, .(xCenter, yCenter)], type=type, col=col, lwd=lwd)
 }
 
 #==========================================
