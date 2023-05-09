@@ -227,24 +227,16 @@ createInteractionDataset <- function(recordingIdToSelect){
 #==========================================
 # Création du jeu de données 'interaction' pour tous les recordings
 #==========================================
-createAllInteractionDataset <- function(startTrack=0,startDataset){
-  fullInteractionsDataset <<- data.table()
-  for (r in unique(trajectoriesDataset$recordingId)[2:32]){
+createAllInteractionDataset <- function(startRecordingId=0){
+  for (r in unique(trajectoriesDataset$recordingId)[startRecordingId:32]){
     result <- createInteractionDataset(r)
     fwrite(result, paste("./interactionsDataset_",r,'.csv',sep=""))
-    fullInteractionsDataset <<- rbind(fullInteractionsDataset,result)
-    filepath <- file.path(format(Sys.time(), "./log/snapshot_%d-%m-%Y_%H-%M-%S.csv"))
-    fwrite(fullInteractionsDataset, filepath)
-    
-    }
-  fullInteractionsDataset
+  }
 }
 
-# Background job
-source("./code/01_init.r", echo = FALSE)
-source("./code/02_plotUtils.R", echo = FALSE)
-dosinit <<- "./data/"
-loadData(dosinit)
+
+source('./code/01_init.r')
+source('./code/02_plotUtils.R')
+loadData()
 cleanDataset()
-testDataset <- createInteractionDataset(0)
-fwrite(testDataset, "./testDataset.csv")
+testDataset <- createAllInteractionDataset(9)
