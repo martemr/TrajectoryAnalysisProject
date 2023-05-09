@@ -5,41 +5,51 @@
 # Date : February 2023, 20th
 # Description : Interprétation des résultats du dataset interactions
 ##---------------------------------------------
+library(circlize)
 
 
-interactionsDataset <- fread("interactions/interactionsDataset_8.csv")
-interactionsDataset <- data.table(read.csv("~/TrajectoryAnalysisProject/run interactions 24.04.23/interactionsDataset.csv"))
+#==========================================
+# Lecture des fichiers interactions
+#==========================================
+loadAllInteractions <- function(dosinit="./data/"){
+  interactions <- data.table()
+  for (i in 0:15) {
+    interactionsName <- sprintf("%s%02d_interactions.csv", dosinit, i)
+    interactions <- rbindlist(list(interactions, fread(interactionsName, header = TRUE, sep = ",")))
+  }
+  interactions
+}
 
+#==========================================
+# Ajout des classes des objets
+#==========================================
 addClassInteractionsDataset <- function(interactionsDataset){
   interactionsDataset <- interactionsDataset[tracksMeta[,.(class1=class,trackId)], on=.(trackId1==trackId), nomatch=NULL]
   interactionsDataset <- interactionsDataset[tracksMeta[,.(class2=class,trackId)], on=.(trackId2==trackId), nomatch=NULL]
   interactionsDataset
 }
-interactionsDataset <- addClassInteractionsDataset(interactionsDataset)
 
 #==========================================
 # Chord classes
 #==========================================
-# Load the circlize library
-library(circlize)
-# Create agency matrix
-conflitAgency <- table(interactionsDataset[interaction=='Conflit',.(class1,class2)])
-InconfortAgency <- table(interactionsDataset[interaction=='Inconfort',.(class1,class2)])
-NoInteractionAgency <- table(interactionsDataset[interaction=='Pas interaction',.(class1,class2)])
-
-# Make the circular plot
-par(mfrow=c(2,2))
-chordDiagram(conflitAgency      , annotationTrack = c("name",'grid'))
-title(main="Conflits")
-chordDiagram(InconfortAgency    , annotationTrack = c("name",'grid'))
-title(main="Inconforts")
+drawChordDiagramInteractions <- function(interactionsDataset){
+  # Create agency matrix
+  conflitAgency <- table(interactionsDataset[interaction=='Conflit',.(class1,class2)])
+  InconfortAgency <- table(interactionsDataset[interaction=='Inconfort',.(class1,class2)])
+  #NoInteractionAgency <- table(interactionsDataset[interaction=='Pas interaction',.(class1,class2)])
+  
+  # Make the circular plot
+  par(mfrow=c(2,2))
+  chordDiagram(conflitAgency      , annotationTrack = c("name",'grid'))
+  title(main="Conflits")
+  chordDiagram(InconfortAgency    , annotationTrack = c("name",'grid'))
+  title(main="Inconforts")
+}
 
 #==========================================
 # Affichage du nombre d'interactions par frame
 #==========================================
-plot(density(interactionsDataset[interaction %in% c('Conflit', 'Inconfort'),frame]))
-
-
+plotDensityPerFrame <- function(interactionsDataset) plot(density(interactionsDataset[interaction %in% c('Conflit', 'Inconfort'),frame]), main="Densité d'interactions conflictuelles par frame", xlab='Frame',ylab="Densité")
 
 #==========================================
 # Affichage des interactions
@@ -54,7 +64,7 @@ getColor <- function(interaction){
   }
 }
 
-drawInterractions <- function(studiedTrackId1, studiedTrackId2){
+drawInterractions <- function(interactionsDataset, studiedTrackId1, studiedTrackId2){
   drawEmptyPlot(paste("Interraction of", studiedTrackId1,'-', studiedTrackId2))
 
   # Tracé des trajectoires étudiées
@@ -79,14 +89,21 @@ drawAllInteractionsTrack <- function(studiedTrack){
   }
 }
 
+interactions <- loadAllInteractions()
+interactions <- addClassInteractionsDataset(interactions)
 
-trackIds <- unique(interactionsDataset[class1=='car' & class2=='bicycle' & interaction=='Conflit',.(trackId1,trackId2)])
+pie(table(interactions$interaction))
+
+drawEmptyPlot("")
+trackIds <- unique(interactions[class1=='car' & class2=='car' & interaction=='Conflit',.(trackId1,trackId2)])
 for (t in seq(1,nrow(trackIds))){
   print(paste("Tracks",trackIds[t]))
-  drawInterractions(unlist(trackIds[t])[1],
+  drawInterractions(interactions, 
+                    unlist(trackIds[t])[1],
                     unlist(trackIds[t])[2])
   readline()
   }
+
 
 
 
