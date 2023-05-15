@@ -71,6 +71,9 @@ loadData <- function(dosinit="./data/"){
   tracksMeta <<- tracksMeta
   recordingMeta <<- recordingMeta
   print("Chargement des données terminé")
+  
+  # Ajout de dosinit aux variables globales
+  dosinit <<- dosinit
 }
 
 
