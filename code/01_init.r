@@ -110,13 +110,13 @@ simplifyDatasetByLifeTime <- function(dataset, fps=5){
 }
 
 simplifyDatasetByFrame <- function(dataset, fps){
-  simplified <- dataset[(frame %% fps)==0]
+  simplified <- dataset[(frame %% (25/fps))==0]
 }
 
 #==========================================
 # Nettoyage du dataset 
 #==========================================
-cleanDataset <- function(distanceMin=20, fps=5){
+cleanDataset <- function(distanceMin=20, fps=5, simplifyMethod="LifeTime"){
   print("Nettoyage des données")
   # Selection par distance minimale parcourue
   trajectoriesDataset <- tracks[trackId %in% unlist(tracksMeta[tracksMeta$distance > distanceMin, 'trackId']),]
@@ -134,8 +134,9 @@ cleanDataset <- function(distanceMin=20, fps=5){
   #trajectoriesDataset <- trajectoriesDataset[!(trajectoriesDataset$'trackId' %in% (tracksToRemove$trackId)),]]
 
   # Simplification des données (25fps -> 5fps)
-  trajectoriesDataset <- simplifyDatasetByLifeTime(trajectoriesDataset, fps=fps)
-
+  if(simplifyMethod=="LifeTime") trajectoriesDataset <- simplifyDatasetByLifeTime(trajectoriesDataset, fps=fps)
+  else trajectoriesDataset <- simplifyDatasetByFrame(trajectoriesDataset, fps=fps)
+  
   # Ajout de la classe de l'objet
   trajectoriesDataset <- trajectoriesDataset[tracksMeta[,.(trackId,class)], on=('trackId'), nomatch = NULL]
 
