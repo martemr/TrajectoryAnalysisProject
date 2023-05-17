@@ -3,7 +3,7 @@
 # CEREMA
 # Author : Martin Emery
 # Date : April 2023, 27th
-# Description : Evaluation du modèle dans le cas réel pour déterminer le bruit de modèle
+# Description : Evaluation du modèle dans le cas réel pour déterminer le l'incertitude dans le modèle.
 ##---------------------------------------------
 
 #==========================================
