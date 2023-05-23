@@ -34,7 +34,7 @@ initPlotImage <- function(LocationId, dosinit="./data/"){
 #==========================================
 # Tracé d'un graphe vide
 #==========================================
-drawEmptyPlot <- function(PlotName,Background=TRUE){
+drawEmptyPlot <- function(PlotName="",Background=TRUE){
   plot(NULL,xlim=Xlim,ylim=Ylim,axes=T,xlab="X",ylab="Y",main=PlotName)
   if(Background) {
     lim <- par()
