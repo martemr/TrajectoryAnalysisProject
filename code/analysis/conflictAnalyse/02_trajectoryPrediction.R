@@ -55,11 +55,11 @@ predictKalmanPosition <- function(studiedTrackId, startFrame,yt){
   
   # H [2*6] : Processus de mesure
   Hmatrix = as.matrix(rbind(c(1, 0, dt,  0, 0.5*(dt)^2,          0),
-                            c(0, 1,  0, dt,          0, 0.5*(dt)^2)))
+                            c(0, 1,  0, dt,          0, 0.5*dt^2)))
 
   
   # yt [2*T] : Observations 
-  yt = yt # t(trajectoriesDataset[trackId==7,.(xCenter,yCenter)][1:10,])
+  yt = yt #t(trajectoriesDataset[trackId==7,.(xCenter,yCenter)][1:10,])
   
   # Appel au filtre de kalman  
   kalmanFilter(x0=x0,
@@ -70,3 +70,10 @@ predictKalmanPosition <- function(studiedTrackId, startFrame,yt){
                Rm = Rmatrix, 
                Hm = Hmatrix)
 }
+
+
+getResultPoints <- function(res){
+  resultsPoints <- t(as.data.table(unlist(res[2], recursive=F)))
+  colnames(resultsPoints) <- c("xCenter","yCenter","xVelocity","yVelocity","xAcceleration","yAcceleration")
+}
+

@@ -18,6 +18,7 @@ Le langage utilisé tous le long du projet est le R. La structure du code est la
    \|-- `code/` *Codes permetant de traiter et visualiser les données*\
 
      \|-- `00_setup.R` ***Installation de toutes les librairies utilisés dans les codes***\
+     \|-- `00_startDay.R` ***Appel de init, plot utils et chargement des données***\
      \|-- `01_init.R` *Fonctions de chargement et nettoyage des données dans l'environnement*\
      \|-- `02_plotUtils.R` *Fonctions permettant l'affichage de trajectoires et plans 2D*\
      \|-- `03_visualisationUtils.R` *Fonction permettant l'affichage de courbes et graphiques*\
@@ -75,8 +76,6 @@ Pour plus de détail sur le format des données voir : <https://www.ind-dataset.
 -   Ouvrir le projet `TrajectoryAnalysisProject.Rproj` sur **R studio**.
 -   Exécuter le code `00_setup.R` afin d'installer les librairies nécessaires. *(Cela peut prendre un certain temps)*
 -   **Pour utiliser l'application :** Exécuter le code `App/app.r`. L'application devrait s'ouvrir.
--   **Pour exécuter du code hors de l'application :** Exécuter au préalable le fichier `00_init.R`, puis dans un terminal R les fonctions : `loadData()` & `cleanDataset()`. Vous pouvez désormais utiliser chacune des fonctions du code. Afin de tracer des trajectoires ou graphiques, exécuter la fonction `initPlotImage(LocationId)` où Location est l'identifiant de la localisation sur laquelle tracer le graphique. 
-
-
+-   **Pour exécuter du code hors de l'application :** Exécuter le script `00_startDay.R`.
 
 **Les dépendances entre codes et fonctions sont indiqués en début de fichier. La mention "DEPRECATED" indique que ce code n'est pas fait pour fonctionner dans l'environnement actuel. Il est reste disponible pour consultation.** Il faut exécuter le fichier au préalable pour charger ses fonctions dans l'environnement.
