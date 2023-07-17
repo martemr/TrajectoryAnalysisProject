@@ -61,8 +61,8 @@ drawVector <- function(x,y,angle,size=10, col='blue'){
 #==========================================
 # Tracé d'UNE trajectoire
 #==========================================
-drawTrajectory <- function(LocationId, tId, dosinit, type="l", col='black', newPlot=TRUE, lwd=1){
-  if(newPlot){
+drawTrajectory <- function(LocationId, tId, dosinit=dosinit, type="l", col='black', add=FALSE, lwd=1){
+  if(!add){
     initPlotImage(LocationId, dosinit)
     drawEmptyPlot(paste("Trajectoire", tId))
   }
@@ -104,7 +104,7 @@ drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TR
 #==========================================
 # Tracé des clusters
 #==========================================
-drawClusters <- function(selectedClass='car', LocationId, clusters, clusterMeta, clusterId='ALL', AllTrajectoriesOnOneGraph = TRUE, annotation=FALSE){
+drawClusters <- function(LocationId, clusters, clusterMeta,selectedClass='car', clusterId='ALL', AllTrajectoriesOnOneGraph = TRUE, annotation=FALSE){
   if(annotation) stop("Not implemented") # TODO
   
   # Selection du cluster à afficher
