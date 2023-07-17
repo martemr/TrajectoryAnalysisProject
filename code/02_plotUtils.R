@@ -181,3 +181,13 @@ getHeading <- function(xVelocity,yVelocity){
   }
 }
 
+#==========================================
+# Attribuer une couleur par classe
+#==========================================
+getCol <- function(class){
+  switch(class,
+         'car'='red', 
+         'truck_bus'='yellow',
+         'pedestrian'='blue',
+         'bicycle'='green')
+}
