@@ -73,7 +73,7 @@ kalmanFilter <- function(x0,P0,yt,Fm,Qm,Rm,Hm){
     x_k_k <- x_k1_k1
   }
 
-  # Renvoie une liste avec les valeurs de positions et variance/covariance, avant et apres correction
+  # Renvoie une liste avec les valeurs de positions et variance/covariance, avant et apres correction et le gain K
   list(x_t1, x_tt, P_t1, P_tt, K)
 }
 
