@@ -1,0 +1,36 @@
+# Critère d'analyse de risque de collision par carrefour
+
+```{r warning=FALSE, include=FALSE}
+# Chargement des données
+collisionRiskDataset <- fread('../../../resultAllCollisions.csv', header = TRUE, sep = ",")
+# Ajout des informations : recordingId,locationId,class
+collisionRiskDataset <- collisionRiskDataset[unique(tracksMeta[,.(trackId,class2=class)]), on=.(trackId2=trackId)]
+collisionRiskDataset <- collisionRiskDataset[unique(trajectoriesDataset[recordingId<=18,.(trackId,recordingId,locationId,class1=class)]), on=.(trackId1=trackId)]
+```
+
+Dans ce jeu de données, les interactions sont classées selon un premier un critère qualitatif, puis selon un risque de collision en pourcentage.
+
+## Temps passé en interation par usager
+
+```{r}
+interactionTime = data.table(
+  'trackId'=as.data.table(table(collisionRiskDataset[,trackId1]))[,1],
+  'tempsEnInteraction(s)'=as.data.table(table(collisionRiskDataset[,trackId1]))[,2]/5,
+  'tempsTotal(s)'=as.data.table(table(trajectoriesDataset[recordingId<=18,trackId]))[,2]/5
+)
+
+interactionTime[,'tauxEnInteraction(s)':=round(`tempsEnInteraction(s).N`/`tempsTotal(s).N`,2)]
+colnames(interactionTime) <- c('trackId','tempsEnInteraction', 'tempsTotal', 'tauxInteraction')
+interactionTime[,trackId:=as.integer(trackId)]
+
+# Aj
+interactionTime <- interactionTime[collisionRiskDataset[,.(trackId1,recordingId,locationId)], on=.(trackId=trackId1)]
+```
+
+```{r}
+par(mfrow=c(2,2))
+
+interactionTimeCumul <- interactionTime[mean(),by=locationId]
+plot(  )
+
+```

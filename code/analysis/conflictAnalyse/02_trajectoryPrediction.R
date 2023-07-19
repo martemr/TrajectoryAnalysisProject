@@ -23,7 +23,8 @@ predictKalmanPosition <- function(studiedTrackId, startFrame,yt){
   # P est l'estimation de l'erreur de prédiction du modèle. On s'inspire de l'erreur réelle dans nos mesures pour le calculer.
   errors <- fread(sprintf("%serrorsPositionKalman.csv",dosinit), header = TRUE, sep = ',')
   err=unlist(errors[unique(trajectoriesDataset[trackId==studiedTrackId,locationId]),])[switch(unique(trajectoriesDataset[trackId==studiedTrackId,class]),                                                                                             'car'=1,'truck_bus'=2,'pedestrian'=3,'bicycle'=4)]
-  err=1
+  err=10
+  print(err)
   P0matrix = as.matrix(rbind(c(err,  0,      0,      0,             0,              0),
                              c(0,  err,      0,      0,             0,              0), 
                              c(0,    0, err*dt,      0,             0,              0),
@@ -42,24 +43,27 @@ predictKalmanPosition <- function(studiedTrackId, startFrame,yt){
   
   # Q [6*6] : Bruit de modèle
   # On considère que notre modèle est fiable donc faible bruit 
-  Qmatrix= as.matrix(rbind(c(10^(-3),  0,          0,          0,                 0,                 0),
-                           c(0,  10^(-3),          0,          0,                 0,                 0), 
-                           c(0,        0, 10^(-3)*dt,          0,                 0,                 0),
-                           c(0,        0,          0, 10^(-3)*dt,                 0,                 0),
-                           c(0,        0,          0,          0,((10^(-3)*dt)^2)/2,                 0),
-                           c(0,        0,          0,          0,                 0,((10^(-3)*dt)^2)/2)))
+  errQ = 1
+  Qmatrix= as.matrix(rbind(c(errQ,    0,       0,       0,              0,                0),
+                           c(0,    errQ,       0,       0,              0,                0), 
+                           c(0,       0, errQ*dt,       0,              0,                0),
+                           c(0,       0,       0, errQ*dt,              0,                0),
+                           c(0,       0,       0,       0,((errQ*dt)^2)/2,                0),
+                           c(0,       0,       0,       0,              0,((errQ*dt)^2)/2)))
   
   # R [2*2] : Bruit de mesure
-  Rmatrix = as.matrix(rbind(c(10^(-3),       0),
-                            c(0      , 10^(-3))))
+  errR = 10
+  Rmatrix = as.matrix(rbind(c(errR,       0),
+                            c(0      , errR)))
   
   # H [2*6] : Processus de mesure
-  Hmatrix = as.matrix(rbind(c(1, 0, dt,  0, 0.5*(dt)^2,          0),
-                            c(0, 1,  0, dt,          0, 0.5*dt^2)))
+  Hmatrix = as.matrix(rbind(c(1, 0, 1, 0, 1, 0),
+                            c(0, 1, 0, 1, 0, 1)))
 
   
   # yt [2*T] : Observations 
-  yt = yt #t(trajectoriesDataset[trackId==7,.(xCenter,yCenter)][1:10,])
+  yt = (trajectoriesDataset[trackId==7,.(xCenter,yCenter)])
+  print(yt)
   
   # Appel au filtre de kalman  
   kalmanFilter(x0=x0,
@@ -75,5 +79,6 @@ predictKalmanPosition <- function(studiedTrackId, startFrame,yt){
 getResultPoints <- function(res){
   resultsPoints <- t(as.data.table(unlist(res[2], recursive=F)))
   colnames(resultsPoints) <- c("xCenter","yCenter","xVelocity","yVelocity","xAcceleration","yAcceleration")
+  resultsPoints
 }
 
