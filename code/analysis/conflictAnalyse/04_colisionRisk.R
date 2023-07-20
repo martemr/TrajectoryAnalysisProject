@@ -10,8 +10,8 @@ library(cgwtools)
 library(spatialEco)
 
 drawSituation <- function(Loc, trajectoireA, trajectoireB, f){
-  initPlotImage(Loc)
-  drawEmptyPlot()
+  #initPlotImage(Loc)
+  drawEmptyPlot(Loc)
   lines(dataset[trackId==trajectoireA, .(xCenter, yCenter)], lwd=2, col='blue')
   lines(dataset[trackId==trajectoireB, .(xCenter, yCenter)], lwd=2, col='blue')
   

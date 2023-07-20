@@ -30,9 +30,7 @@ ui <-
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
   loadAll(input,output)
-
   generalServer(input,output)
-
   detailledStudyServer(input,output)
 }
 

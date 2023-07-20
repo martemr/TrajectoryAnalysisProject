@@ -12,14 +12,14 @@
 library(dplyr)
 library(data.table)
 library(concaveman)
-library(sp) # Pointin polygon
+library(sp) # Point in polygon
 library(logr) # Logs
 
 #==========================================
 # Calcul de distance
 #==========================================
 euclidean <- function(a, b) sqrt(sum((a - b)^2))
-sum_distance <- function(x, y) {
+sumDistance <- function(x, y) {
   n <- length(x)
   total_distance <- 0
   for (i in 1:(n-1)) {
@@ -59,7 +59,7 @@ loadData <- function(dosinit="./data/"){
   tracksMeta[, trackId := trackId + recordingId*100000]
   
   # Ajout de la distance parcourue dans les métadonnées
-  distance <- tracks[, .(distance = sum_distance(unlist(.SD[, xCenter]), unlist(.SD[, yCenter]))), by = trackId]
+  distance <- tracks[, .(distance = sumDistance(unlist(.SD[, xCenter]), unlist(.SD[, yCenter]))), by = trackId]
   tracksMeta <- merge(tracksMeta, distance, by = "trackId")
   
   # Ajout de la localisation partout
@@ -80,14 +80,14 @@ loadData <- function(dosinit="./data/"){
 #==========================================
 # Détermination de la voie (chaussée)
 #==========================================
-findRoad <- function(toPlot = FALSE, trajectoriesDataset, LocId){
-  x = unlist(trajectoriesDataset[class %in% c('car','truck_bus') & recordingId %in% recordingMeta[locationId==LocId, recordingId],'xCenter'])
-  y = unlist(trajectoriesDataset[class %in% c('car','truck_bus') & recordingId %in% recordingMeta[locationId==LocId, recordingId],'yCenter'])
+findRoad <- function(toPlot = FALSE, dataset, locId){
+  x = unlist(dataset[class %in% c('car','truck_bus') & recordingId %in% recordingMeta[locationId==locId, recordingId],'xCenter'])
+  y = unlist(dataset[class %in% c('car','truck_bus') & recordingId %in% recordingMeta[locationId==locId, recordingId],'yCenter'])
   
   # Compute the convex hull polygon
   roadArea <- concaveman(cbind(x, y))
   if(toPlot){
-    drawEmptyPlot("")
+    drawEmptyPlot(locId, "")
     lines(roadArea,col='red', lwd=2)
   }
   roadArea
@@ -129,8 +129,6 @@ cleanDataset <- function(distanceMin=20, fps=5, simplifyMethod="LifeTime"){
   toRemove <- rbind(toRemove, tracksMeta[initialFrame<5, .(recordingId, trackId)])
   
   trajectoriesDataset <- trajectoriesDataset[!unlist(trajectoriesDataset[,.(recordingId %in% toRemove$recordingId & trackId %in% toRemove$trackId)])]
-  #################### >
-  
   #trajectoriesDataset <- trajectoriesDataset[!(trajectoriesDataset$'trackId' %in% (tracksToRemove$trackId)),]]
 
   # Simplification des données (25fps -> 5fps)
@@ -142,7 +140,7 @@ cleanDataset <- function(distanceMin=20, fps=5, simplifyMethod="LifeTime"){
 
   # Ajout de l'information "sur la route"
   for(LocalisationId in unique(recordingMeta$locationId)){
-    roadArea = findRoad(trajectoriesDataset=trajectoriesDataset, LocId = LocalisationId)
+    roadArea = findRoad(dataset=trajectoriesDataset, locId = LocalisationId)
     trajectoriesDataset[locationId==LocalisationId, isOnRoad := as.logical(point.in.polygon(xCenter, yCenter, roadArea[, 1], roadArea[, 2]))]
   }
   

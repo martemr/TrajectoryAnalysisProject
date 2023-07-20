@@ -14,7 +14,7 @@ library(png)
 #==========================================
 # Initialisation des paramêtres
 #==========================================
-initPlotImage <- function(LocationId, dosinit="./data/"){
+initPlotImage <- function(LocationId){
   fact <- switch(LocationId, 
                  '1' = 10.2,
                  '2' = 10.2, 
@@ -34,7 +34,8 @@ initPlotImage <- function(LocationId, dosinit="./data/"){
 #==========================================
 # Tracé d'un graphe vide
 #==========================================
-drawEmptyPlot <- function(PlotName="",Background=TRUE){
+drawEmptyPlot <- function(locId, PlotName="",Background=TRUE, dosinit="./data/"){
+  initPlotImage(locId)
   plot(NULL,xlim=Xlim,ylim=Ylim,axes=T,xlab="X",ylab="Y",main=PlotName)
   if(Background) {
     lim <- par()
@@ -56,46 +57,43 @@ drawVector <- function(x,y,angle,size=10, col='blue'){
          lwd = 2, col = col)
 }
 
-
+#==========================================
+# Attribuer une couleur par classe
+#==========================================
+getCol <- function(class){
+  switch(class,
+         'car'='red', 
+         'truck_bus'='yellow',
+         'pedestrian'='blue',
+         'bicycle'='green')
+}
 
 #==========================================
 # Tracé d'UNE trajectoire
 #==========================================
-drawTrajectory <- function(LocationId, tId, dosinit=dosinit, type="l", col='black', add=FALSE, lwd=1){
+drawTrajectory <- function(LocationId, tId, type="l", col='black', add=FALSE, lwd=1){
   if(!add){
-    initPlotImage(LocationId, dosinit)
-    drawEmptyPlot(paste("Trajectoire", tId))
+    #initPlotImage(LocationId, dosinit)
+    drawEmptyPlot(locId=LocationId, PlotName = paste("Trajectoire", tId))
   }
-  points(tracks[trackId==tId, .(xCenter, yCenter)], type=type, col=col, lwd=lwd)
+  points(tracks[trackId==tId, list(xCenter, yCenter)], type=type, col=col, lwd=lwd)
 }
 
 #==========================================
 # Tracé des trajectoires
 #==========================================
-drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL', legend=FALSE){
-  initPlotImage(LocationId, dosinit)
+drawTrajectories <- function(LocationId, AllTrajectoriesOnOneGraph = TRUE, StudiedClass='ALL', legend=FALSE){
   subDataset <- trajectoriesDataset[recordingId %in% (recordingMeta[locationId==LocationId, recordingId]),]
   if(AllTrajectoriesOnOneGraph){
-    drawEmptyPlot("Trajectoires")
+    drawEmptyPlot(locId=LocationId,PlotName="Trajectoires")
   }
-  if (StudiedClass=='ALL') classList <- unique(subDataset$class)
-  else classList <- StudiedClass
+  if (StudiedClass=='ALL') classList <- unique(subDataset$class) else classList <- StudiedClass
+  if (!AllTrajectoriesOnOneGraph) par(mfrow=c(2,2))# Grille
   for (cl in classList)
   {
-    if (!AllTrajectoriesOnOneGraph){
-      par(mfrow=c(2,2))# Grille
-      drawEmptyPlot(paste("Trajectories of", cl))
-    } 
-    for (tId in unique(subDataset[class == cl, trackId])) {
-      
-      lines(unlist(subDataset[trackId == tId, xCenter]),
-            unlist(subDataset[trackId == tId, yCenter]),
-            col = (switch(cl, 
-                          'car'='red', 
-                          'truck_bus'='yellow',
-                          'pedestrian'='blue',
-                          'bicycle'='green')))
-    }
+    if (!AllTrajectoriesOnOneGraph) drawEmptyPlot(locId=LocationId,PlotName=paste("Trajectories of", cl))
+    color=getCol(cl)
+    lapply(unique(subDataset[class == cl, trackId]), function(x) drawTrajectory(LocationId, x,col=color,add=T))
   }
   if(legend) legend(1,1, legend=c('Voitures','Bus','Piétons','Cyclistes'),
                     col=c('red','yellow','blue', 'green'), lty=1, cex=0.8, lwd=2)
@@ -106,17 +104,17 @@ drawTrajectories <- function(LocationId, dosinit, AllTrajectoriesOnOneGraph = TR
 #==========================================
 drawClusters <- function(LocationId, clusters, clusterMeta,selectedClass='car', clusterId='ALL', AllTrajectoriesOnOneGraph = TRUE, annotation=FALSE){
   if(annotation) stop("Not implemented") # TODO
-  
+
   # Selection du cluster à afficher
   clusterIdList <- unique(clusters$clusterId)
   #if (clusterId=='ALL') clusterIdList <- unique(clusters$clusterId)
   #else clusterIdList <- clusterId
   
-  if(AllTrajectoriesOnOneGraph) drawEmptyPlot("Clusters")
+  if(AllTrajectoriesOnOneGraph) drawEmptyPlot(LocationId, "Clusters")
   
   for (cId in clusterIdList){
     idList = unlist(clusters[locationId==LocationId & class==selectedClass & clusterId==cId, trackId])
-    if(!AllTrajectoriesOnOneGraph) drawEmptyPlot(paste("Cluster", cId))
+    if(!AllTrajectoriesOnOneGraph) drawEmptyPlot(LocationId, paste("Cluster", cId))
     color=clusterMeta[clusterId==cId, color]
     for (id in unlist(idList)) {
       lines(unlist(trajectoriesDataset[trajectoriesDataset$trackId == id, "xCenter"]),
@@ -160,7 +158,7 @@ convertColor <- function(c, class){
 }
 
 drawOnRoad <- function(trajectoriesDataset, studiedClass, LocId){
-  drawEmptyPlot("Traversées de chausée")
+  drawEmptyPlot(LocId, "Traversées de chausée")
   for (tId in unique(trajectoriesDataset[locationId==LocId & class==studiedClass, trackId])){
     #print(tId)
     col <- sapply(trajectoriesDataset[trackId==tId,isOnRoad], function(x) convertColor(x, studiedClass))
@@ -181,13 +179,4 @@ getHeading <- function(xVelocity,yVelocity){
   }
 }
 
-#==========================================
-# Attribuer une couleur par classe
-#==========================================
-getCol <- function(class){
-  switch(class,
-         'car'='red', 
-         'truck_bus'='yellow',
-         'pedestrian'='blue',
-         'bicycle'='green')
-}
+

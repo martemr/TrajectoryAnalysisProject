@@ -96,7 +96,7 @@ flowDiagram <- function(selectedClass="car", LocationId, clusterMeta, indMaxAnno
   locationClusterMeta <- clusterMeta[locationId==LocationId & class==selectedClass,]
   setorder(locationClusterMeta, cols = -"size") # Tri par taille
   if(allFlowOnOneGraph) {
-    drawEmptyPlot("Flux de déplacements")
+    drawEmptyPlot(LocationId, "Flux de déplacements")
     apply(locationClusterMeta,1, function(x) plotCluster(unlist(x[3]), unlist(x[4]), unlist(x[5]), unlist(x[6]), totalFlowSize = sum(locationClusterMeta$size), drawBackground = FALSE, addAnnotation=FALSE))
     if(WithAnnotations) addAnnotations(locationClusterMeta, indMaxAnnotation, Type="veh/h")
   } else {

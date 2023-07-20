@@ -11,4 +11,4 @@ source("code/02_plotUtils.R")
 
 loadData()
 cleanDataset()
-initPlotImage(1)
+#initPlotImage(1)

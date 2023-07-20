@@ -15,7 +15,7 @@ detailledStudyServer <- function(input, output){
       print("Chargement trajectoire")
       LocId <- input$LocalisationId
       class <- input$classId
-      drawTrajectories(LocId,dosinit, AllTrajectoriesOnOneGraph = TRUE, StudiedClass = class)
+      drawTrajectories(LocId, AllTrajectoriesOnOneGraph = TRUE, StudiedClass = class)
       print(" → done")
   }, cacheKeyExpr = {list(input$classId, input$LocalisationId)})
   
@@ -24,7 +24,7 @@ detailledStudyServer <- function(input, output){
     print("Chargement clusters")
     LocId <- input$LocalisationId
     class <-input$classId
-    drawClusters(class,LocId, clusters, clusterMeta, AllTrajectoriesOnOneGraph = TRUE)
+    drawClusters(LocId, clusters, clusterMeta,selectedClass = class, AllTrajectoriesOnOneGraph = TRUE)
     print(" → done")
   }, cacheKeyExpr = {list(input$classId, input$LocalisationId)})
   

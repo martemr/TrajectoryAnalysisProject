@@ -11,8 +11,8 @@ generalServer <- function(input, output){
   convertDay <- function(day){
     switch(day,
       "monday"   = "lundi",
-      "tuesday"   = "mardi",
-      "tuesdays"   = "mardi",
+      "tuesday"  = "mardi",
+      "tuesdays" = "mardi",
       "wednesday"= "mercredi",
       "thursday" = "jeudi",
       "friday"   = "vendredi",
@@ -35,8 +35,8 @@ generalServer <- function(input, output){
   # Zone d'étude
   output$zoneEtude <- renderPlot({
     LocId <- input$LocalisationId
-    initPlotImage(LocId, dosinit)
-    drawEmptyPlot("Zone d'étude")
+    #initPlotImage(LocId, dosinit)
+    drawEmptyPlot(locId=LocId, "Zone d'étude", dosinit=dosinit)
   }, width = 900, height = 600)
   
   # Trajectoires
@@ -44,7 +44,7 @@ generalServer <- function(input, output){
     renderCachedPlot({
       LocId <- input$LocalisationId
       #par(mfrow = c(2, 2))
-      drawTrajectories(LocId, dosinit, AllTrajectoriesOnOneGraph = TRUE, legend=TRUE)
+      drawTrajectories(LocId, AllTrajectoriesOnOneGraph = TRUE, legend=TRUE)
     }, sizePolicy = sizeGrowthRatio(width= 900, height = 600, growthRate = 1),
     cacheKeyExpr = {list(input$LocalisationId)})
 }
