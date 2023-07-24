@@ -65,11 +65,11 @@ getColor <- function(interaction){
 }
 
 drawInterractions <- function(interactionsDataset, studiedTrackId1, studiedTrackId2){
-  drawEmptyPlot(paste("Interraction of", studiedTrackId1,'-', studiedTrackId2))
+  drawEmptyPlot(1, paste("Interraction of", studiedTrackId1,'-', studiedTrackId2))
 
   # Tracé des trajectoires étudiées
-  drawTrajectory(4,studiedTrackId1,dosinit,col='blue',newPlot=FALSE)
-  drawTrajectory(4,studiedTrackId2,dosinit,col='blue',newPlot=FALSE)
+  drawTrajectory(LocationId = 1,tId = studiedTrackId1,col='blue',add = T)
+  drawTrajectory(LocationId = 1,tId = studiedTrackId2,col='blue',add = T)
   #addArrow(studiedTrackId1, color='blue')
   #addArrow(studiedTrackId2, color='blue')
   #print("ok")

@@ -46,12 +46,11 @@ createAllClustersOfLocalisation <- function(LocationId, tracksMeta){
   # tracksMetaBis <- merge(tracksMeta, clusters, by=('trackId'), all.x=TRUE)
   # tracksMeta <<- tracksMetaBis
   clusterMeta <<- getClusterMeta(tracksMeta, clusters)
-  
 }
 
 createClusters <- function(LocId, ClusteringClass="car", clusters, minSizecluster=4, eps=0.20, plot=FALSE){
   clusterDataset <- trajectoriesDataset[trackId %in% clusters[locationId==LocId & class==ClusteringClass, trackId],]
-  print(plot)
+  #print(plot)
   # Origine
   tracksMetaCluster <- tracksMeta[clusterDataset[trackLifetime<5,.(origineHeading=mean(heading)),by = "trackId"]
                                   , on='trackId'
